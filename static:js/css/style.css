@@ -1,0 +1,36 @@
+.jumbotron {
+    background-size: large;
+  }
+
+.buffer {
+    margin-top:4%;
+}
+
+.textdelay {
+    opacity: 0;
+    animation: subtitle .75s forwards linear;
+    animation-delay: .75s;  
+}
+
+.textdelay2 {
+    opacity: 0;
+    animation: subtitle 1.2s forwards linear;
+    animation-delay: 1.2s;  
+}
+
+.picturedelay {
+    opacity: 0;
+    animation: subtitle 1.5s forwards linear;
+    animation-delay: 1.5s;  
+}
+  
+
+@keyframes subtitle {
+    from {
+      opacity: 0;
+    }
+  
+    to {
+      opacity: 1;
+    }
+  }
