@@ -10,3 +10,6 @@ print(mongo.db.list_collection_names())
 @app.route("/data-analyst")
 def dataAnalyst():
     return mongo.db.CleanDataAnalyst.find()
+
+if __name__ == "__main__":
+    app.run(debug=True)
