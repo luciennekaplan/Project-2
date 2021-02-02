@@ -54,4 +54,3 @@ for files in csvpaths:
     print(f"Rows imported: {collection.count()}")
 # Check the collections created
 print(f"Created the following collections:\n {db.list_collection_names()}")
-print(db.CleanDataAnalyst.find_one())
