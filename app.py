@@ -3,6 +3,6 @@ from flask_pymongo import PyMongo
 
 # Setup flask and Mongo
 app = Flask(__name__)
-mongo = PyMongo(app, uri="mongodb://localhost:27017/employment_app")
+mongo = PyMongo(app, uri="mongodb://localhost:27017/employmentDB")
 
-print(mongo.employmentDB.list_collection_names())
+print(mongo.db.list_collection_names())
