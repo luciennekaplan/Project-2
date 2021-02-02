@@ -6,3 +6,7 @@ app = Flask(__name__)
 mongo = PyMongo(app, uri="mongodb://localhost:27017/employmentDB")
 
 print(mongo.db.list_collection_names())
+
+@app.route("/data-analyst")
+def dataAnalyst():
+    return mongo.db.CleanDataAnalyst.find()
