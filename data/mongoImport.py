@@ -18,9 +18,9 @@ def nameTheCollection(name):
     finalSlash = name.rfind('/')+1
     return name[finalSlash:-4]
 
-# Begin import
+# For each file in the directory
 for files in csvpaths:
-    # Make a new collection based on the file
+    # Make a new collection based on the filename
     collection = db.create_collection(nameTheCollection(files))
     with open(files) as csvfile:
         csvreader = csv.reader(csvfile, delimiter=',')
@@ -28,28 +28,30 @@ for files in csvpaths:
         csv_header = next(csvreader)
         print(csv_header)
 
+        # Insert each row into the collection
         for row in csvreader:
-            # Insert into DB - CHANGE FOR EACH CSV
             collection.insert_one(
                 {
-                    "title":row[1],
-                    "salaryHigh":row[2],
-                    "salaryLow":row[2],
-                    "description":row[3],
-                    "rating":row[4],
-                    "company":row[5],
-                    "location":row[6],
-                    "hq":row[7],
-                    "size":row[8],
-                    "founded":row[9],
-                    "type":row[10],
-                    "industry":row[11],
-                    "sector":row[12],
-                    "revenue":row[13],
-                    "competitors":row[14],
-                    "easy":row[15]
+                    "title":row[0],
+                    "salaryHigh":row[16],
+                    "salaryLow":row[15],
+                    "description":row[2],
+                    "rating":row[3],
+                    "company":row[4],
+                    "location":row[5],
+                    "hq":row[6],
+                    "size":row[7],
+                    "founded":row[8],
+                    "type":row[9],
+                    "industry":row[10],
+                    "sector":row[11],
+                    "revenue":row[12],
+                    "competitors":row[13],
+                    "easy":row[14]
                 }
             )
     # Check rows imported matches CSV length
     print(f"Rows imported: {collection.count()}")
+# Check the collections created
 print(f"Created the following collections:\n {db.list_collection_names()}")
+print(db.CleanDataAnalyst.find_one())
