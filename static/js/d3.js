@@ -15,7 +15,7 @@ var width = svgWidth - margin.left - margin.right;
 var height = svgHeight - margin.top - margin.bottom;
 
 // here is where we input the svg into the html
-var svg = d3.select("#bar")
+var svg = d3.select("#industrybar")
     .append("svg")
     .attr("height", svgHeight)
     .attr("width", svgWidth);
@@ -24,7 +24,7 @@ var svg = d3.select("#bar")
 var chartGroup = svg.append("g")
     .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
-var url = //whatever the route name is to access mongoDB
+var url = "/data-analyst"
 d3.json(url).then(function(data) {
     console.log(data)
     var industries = {};
@@ -57,11 +57,11 @@ d3.json(url).then(function(data) {
         .attr("transform", `translate(0, ${height})`)
         .call(bottomAxis);
 
-    chartGroup.selectAll(".bar")
+    chartGroup.selectAll(".indusbar")
         .data(industries)
         .enter()
         .append("rect")
-        .classed("bar", true)
+        .classed("indusbar", true)
         .attr("x", d => xScale(Object.keys(d)))
         .attr("y", d => yScale(Object.values(d)))
         .attr("width", xScale.bandwidth())
