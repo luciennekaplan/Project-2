@@ -1,0 +1,45 @@
+.jumobotron {
+    background-size: small;
+}
+
+.buffer {
+    margin-top:4%;
+}
+
+.jumbotron {
+    background-size: fill;
+    height: 100%;
+}
+
+.headerfont {
+    color: white;
+}
+
+.textdelay {
+    opacity: 0;
+    animation: subtitle .75s forwards linear;
+    animation-delay: .75s;  
+}
+
+.textdelay2 {
+    opacity: 0;
+    animation: subtitle 1.2s forwards linear;
+    animation-delay: 1.2s;  
+}
+
+.picturedelay {
+    opacity: 0;
+    animation: subtitle 1.5s forwards linear;
+    animation-delay: 1.5s;  
+}
+  
+
+@keyframes subtitle {
+    from {
+      opacity: 0;
+    }
+  
+    to {
+      opacity: 1;
+    }
+  }
