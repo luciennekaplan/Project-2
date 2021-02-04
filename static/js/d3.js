@@ -1,6 +1,6 @@
 // Here we set the svg area
-var svgWidth = 800;
-var svgHeight = 600;
+var svgWidth = 500;
+var svgHeight = 500;
 
 // and the margins so the axes labels will fit in the svg
 var margin = {
@@ -37,33 +37,66 @@ d3.json(url).then(function(data) {
         }
     })
     console.log(industries)
+    var industryName = Object.keys(industries)
+    var industryCount = Object.values(industries)
+    var industryListDict = []
 
+    industryName.forEach((d, i) => {
+        var dicty = {
+            name: d,
+            count: industryCount[i]
+        }
+        industryListDict.push(dicty)
+    })
+    console.log(industryListDict)
+
+    var sortedDicts = industryListDict.sort(function(a,b) {
+        return b.count - a.count
+    })
+    console.log(sortedDicts)
+    var topTen = sortedDicts.slice(0,10)
+    console.log(topTen)
     var xScale = d3.scaleBand()
-    .domain(Object.keys(industries))
+    .domain(topTen.map(d => d.name))
     .range([0, width])
     .padding(0.1);
 
     var yScale = d3.scaleLinear()
-    .domain([0, d3.max(Object.values(industries))])
+    .domain([0, d3.max(topTen, d => d.count)])
     .range([height, 0]);
 
     var bottomAxis = d3.axisBottom(xScale);
     var leftAxis = d3.axisLeft(yScale);
-    console.log(d3.max(Object.values(industries)))
+    
     chartGroup.append("g")
         .call(leftAxis);
 
     chartGroup.append("g")
         .attr("transform", `translate(0, ${height})`)
-        .call(bottomAxis);
+        .call(bottomAxis)
+        .selectAll("text")
+        .attr("y", 0)
+        .attr("x", 9)
+        .attr("dy", ".35em")
+        .attr("transform", "rotate(25)")
+        .style("text-anchor", "start");
+
+    var toolTip = d3.tip()
+        .attr("class", "d3-tip")
+        .offset([-3, 0])
+        .html(function (d) { 
+                return `${d.name} <br> # of jobs: ${d.count}`;});
+    svg.call(toolTip);
 
     chartGroup.selectAll(".indusbar")
-        .data(industries)
+        .data(topTen)
         .enter()
         .append("rect")
         .classed("indusbar", true)
-        .attr("x", d => xScale(Object.keys(d)))
-        .attr("y", d => yScale(Object.values(d)))
+        .attr("x", d => xScale(d.name))
+        .attr("y", d => yScale(d.count))
         .attr("width", xScale.bandwidth())
-        .attr("height", d => height - yScale(Object.values(d)));
+        .attr("height", d => height - yScale(d.count))
+        .on("mouseover", toolTip.show)
+        .on("mouseout", toolTip.hide);
 })
