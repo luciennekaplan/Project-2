@@ -28,7 +28,7 @@ var url = "/data-analyst"
 d3.json(url).then(function(data) {
     console.log(data)
     var industries = {};
-    data.forEach((d, i) => {
+    data.result.forEach((d, i) => {
         if (d[i].industry in industries) {
             industries[d[i].industry] += 1;
         }
