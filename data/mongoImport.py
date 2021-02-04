@@ -22,7 +22,7 @@ def nameTheCollection(name):
 for files in csvpaths:
     # Make a new collection based on the filename
     collection = db.create_collection(nameTheCollection(files))
-    with open(files) as csvfile:
+    with open(files, encoding="utf8") as csvfile:
         csvreader = csv.reader(csvfile, delimiter=',')
         # Skip over the header and print it
         csv_header = next(csvreader)
