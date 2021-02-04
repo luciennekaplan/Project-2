@@ -2,8 +2,22 @@
     background-size: small;
 }
 
+#mapid,
+body,
+html {
+  height: 100%;
+}
+
 .buffer {
     margin-top:4%;
+}
+
+.col-md-12{
+    height: 500px;
+  }
+
+.bottombuffer {
+    margin-bottom: 10%;
 }
 
 .jumbotron {
