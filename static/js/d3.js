@@ -56,7 +56,9 @@ d3.json(url).then(function(data) {
     console.log(sortedDicts)
     var topTen = sortedDicts.slice(0,10)
     var tenToTwenty = sortedDicts.slice(10,20)
-    console.log(topTen)
+    var twentyToThirty = sortedDicts.slice(20,30)
+    var thirtyToForty = sortedDicts.slice(30,40)
+    var fortyToFifty = sortedDicts.slice(40,50)
     var xScale = d3.scaleBand()
     .domain(topTen.map(d => d.name))
     .range([0, width])
@@ -116,6 +118,79 @@ d3.json(url).then(function(data) {
         .attr("font-size", "16px")
         .classed("inactive", true) // I also add the class "x" to the active x axis label so that I can access it later in the listeners
         .text("2");
+       
+    var twentyToThirtyAxis = chartGroup.append("text")
+        .attr("transform", `translate(${(width / 2) - 10}, ${height + margin.top})`)
+        .attr("text-anchor", "middle")
+        .attr("font-size", "16px")
+        .classed("inactive", true) // I also add the class "x" to the active x axis label so that I can access it later in the listeners
+        .text("3");
+
+    var thirtyToFortyAxis = chartGroup.append("text")
+        .attr("transform", `translate(${(width / 2)}, ${height + margin.top})`)
+        .attr("text-anchor", "middle")
+        .attr("font-size", "16px")
+        .classed("inactive", true) // I also add the class "x" to the active x axis label so that I can access it later in the listeners
+        .text("4");
+
+    var fortyToFiftyAxis = chartGroup.append("text")
+        .attr("transform", `translate(${(width / 2) + 10}, ${height + margin.top})`)
+        .attr("text-anchor", "middle")
+        .attr("font-size", "16px")
+        .classed("inactive", true) // I also add the class "x" to the active x axis label so that I can access it later in the listeners
+        .text("5");
+    
+    
+    topTenAxis.on("click", function (d) {
+        topTenAxis.classed("inactive", false)
+            .classed("active x", true);
+        tenToTwentyAxis.classed("inactive", true)
+            .classed("active x", false);
+        console.log(topTen)
+        
+        xScale = d3.scaleBand()
+        .domain(topTen.map(d => d.name))
+        .range([0, width])
+        .padding(0.1);
+    
+        yScale = d3.scaleLinear()
+        .domain([0, d3.max(topTen, d => d.count)])
+        .range([height, 0]);
+    
+        bottomAxis = d3.axisBottom(xScale);
+        leftAxis = d3.axisLeft(yScale);
+
+        d3.select(".xAxis")
+            .transition()
+            .duration(500)
+            .call(bottomAxis)
+            .selectAll("text")
+            .attr("y", 0)
+            .attr("x", 9)
+            .attr("dy", ".35em")
+            .attr("transform", "rotate(25)")
+            .style("text-anchor", "start");
+
+        d3.select(".yAxis")
+            .transition()
+            .duration(500)
+            .call(leftAxis)
+
+        d3.selectAll(".indusbar")
+            .remove()
+
+        chartGroup.selectAll(".indusbar")
+            .data(topTen)
+            .enter()
+            .append("rect")
+            .classed("indusbar", true)
+            .attr("x", d => xScale(d.name))
+            .attr("y", d => yScale(d.count))
+            .attr("width", xScale.bandwidth())
+            .attr("height", d => height - yScale(d.count))
+            .on("mouseover", toolTip.show)
+            .on("mouseout", toolTip.hide);
+    })
 
     tenToTwentyAxis.on("click", function (d) {
         topTenAxis.classed("inactive", true)
@@ -153,11 +228,197 @@ d3.json(url).then(function(data) {
             .call(leftAxis)
 
         d3.selectAll(".indusbar")
+            .remove()
+
+        chartGroup.selectAll(".indusbar")
             .data(tenToTwenty)
             .enter()
+            .append("rect")
+            .classed("indusbar", true)
             .attr("x", d => xScale(d.name))
             .attr("y", d => yScale(d.count))
             .attr("width", xScale.bandwidth())
-            .attr("height", d => height - yScale(d.count));
+            .attr("height", d => height - yScale(d.count))
+            .on("mouseover", toolTip.show)
+            .on("mouseout", toolTip.hide);
+    })
+
+    twentyToThirtyAxis.on("click", function (d) {
+        topTenAxis.classed("inactive", true)
+            .classed("active x", false);
+        tenToTwentyAxis.classed("inactive", true)
+            .classed("active x", false);
+        twentyToThirtyAxis.classed("inactive", false)
+            .classed("active x", true);
+        thirtyToFortyAxis.classed("inactive", true)
+            .classed("active x", false);
+        fortyToFiftyAxis.classed("inactive", true)
+            .classed("active x", false);
+        
+        
+        console.log(twentyToThirty)
+        
+        xScale = d3.scaleBand()
+        .domain(twentyToThirty.map(d => d.name))
+        .range([0, width])
+        .padding(0.1);
+    
+        yScale = d3.scaleLinear()
+        .domain([0, d3.max(twentyToThirty, d => d.count)])
+        .range([height, 0]);
+    
+        bottomAxis = d3.axisBottom(xScale);
+        leftAxis = d3.axisLeft(yScale);
+
+        d3.select(".xAxis")
+            .transition()
+            .duration(500)
+            .call(bottomAxis)
+            .selectAll("text")
+            .attr("y", 0)
+            .attr("x", 9)
+            .attr("dy", ".35em")
+            .attr("transform", "rotate(25)")
+            .style("text-anchor", "start");
+
+        d3.select(".yAxis")
+            .transition()
+            .duration(500)
+            .call(leftAxis)
+
+        d3.selectAll(".indusbar")
+            .remove()
+
+        chartGroup.selectAll(".indusbar")
+            .data(twentyToThirty)
+            .enter()
+            .append("rect")
+            .classed("indusbar", true)
+            .attr("x", d => xScale(d.name))
+            .attr("y", d => yScale(d.count))
+            .attr("width", xScale.bandwidth())
+            .attr("height", d => height - yScale(d.count))
+            .on("mouseover", toolTip.show)
+            .on("mouseout", toolTip.hide);
+    })
+
+
+    thirtyToFortyAxis.on("click", function (d) {
+        topTenAxis.classed("inactive", true)
+            .classed("active x", false);
+        tenToTwentyAxis.classed("inactive", true)
+            .classed("active x", false);
+        twentyToThirtyAxis.classed("inactive", true)
+            .classed("active x", false);
+        thirtyToFortyAxis.classed("inactive", false)
+            .classed("active x", true);
+        fortyToFiftyAxis.classed("inactive", true)
+            .classed("active x", false);
+        
+        
+        console.log(thirtyToForty)
+        
+        xScale = d3.scaleBand()
+        .domain(thirtyToForty.map(d => d.name))
+        .range([0, width])
+        .padding(0.1);
+    
+        yScale = d3.scaleLinear()
+        .domain([0, d3.max(thirtyToForty, d => d.count)])
+        .range([height, 0]);
+    
+        bottomAxis = d3.axisBottom(xScale);
+        leftAxis = d3.axisLeft(yScale);
+
+        d3.select(".xAxis")
+            .transition()
+            .duration(500)
+            .call(bottomAxis)
+            .selectAll("text")
+            .attr("y", 0)
+            .attr("x", 9)
+            .attr("dy", ".35em")
+            .attr("transform", "rotate(25)")
+            .style("text-anchor", "start");
+
+        d3.select(".yAxis")
+            .transition()
+            .duration(500)
+            .call(leftAxis)
+
+        d3.selectAll(".indusbar")
+            .remove()
+
+        chartGroup.selectAll(".indusbar")
+            .data(thirtyToForty)
+            .enter()
+            .append("rect")
+            .classed("indusbar", true)
+            .attr("x", d => xScale(d.name))
+            .attr("y", d => yScale(d.count))
+            .attr("width", xScale.bandwidth())
+            .attr("height", d => height - yScale(d.count))
+            .on("mouseover", toolTip.show)
+            .on("mouseout", toolTip.hide);
+    })
+
+
+    fortyToFiftyAxis.on("click", function (d) {
+        topTenAxis.classed("inactive", true)
+            .classed("active x", false);
+        tenToTwentyAxis.classed("inactive", true)
+            .classed("active x", false);
+        twentyToThirtyAxis.classed("inactive", true)
+            .classed("active x", false);
+        thirtyToFortyAxis.classed("inactive", true)
+            .classed("active x", false);
+        fortyToFiftyAxis.classed("inactive", false)
+            .classed("active x", true);
+        
+        
+        console.log(fortyToFifty)
+        
+        xScale = d3.scaleBand()
+        .domain(fortyToFifty.map(d => d.name))
+        .range([0, width])
+        .padding(0.1);
+    
+        yScale = d3.scaleLinear()
+        .domain([0, d3.max(fortyToFifty, d => d.count)])
+        .range([height, 0]);
+    
+        bottomAxis = d3.axisBottom(xScale);
+        leftAxis = d3.axisLeft(yScale);
+
+        d3.select(".xAxis")
+            .transition()
+            .duration(500)
+            .call(bottomAxis)
+            .selectAll("text")
+            .attr("y", 0)
+            .attr("x", 9)
+            .attr("dy", ".35em")
+            .attr("transform", "rotate(25)")
+            .style("text-anchor", "start");
+
+        d3.select(".yAxis")
+            .transition()
+            .duration(500)
+            .call(leftAxis)
+
+        d3.selectAll(".indusbar")
+            .remove()
+
+        chartGroup.selectAll(".indusbar")
+            .data(fortyToFifty)
+            .enter()
+            .append("rect")
+            .classed("indusbar", true)
+            .attr("x", d => xScale(d.name))
+            .attr("y", d => yScale(d.count))
+            .attr("width", xScale.bandwidth())
+            .attr("height", d => height - yScale(d.count))
+            .on("mouseover", toolTip.show)
+            .on("mouseout", toolTip.hide);
     })
 })
