@@ -29,11 +29,11 @@ d3.json(url).then(function(data) {
     console.log(data)
     var industries = {};
     data.result.forEach((d, i) => {
-        if (d[i].industry in industries) {
-            industries[d[i].industry] += 1;
+        if (d.industry in industries) {
+            industries[d.industry] += 1;
         }
         else {
-            industries[d[i].industry] = 1;
+            industries[d.industry] = 1;
         }
     })
     console.log(industries)
@@ -49,7 +49,7 @@ d3.json(url).then(function(data) {
 
     var bottomAxis = d3.axisBottom(xScale);
     var leftAxis = d3.axisLeft(yScale);
-
+    console.log(d3.max(Object.values(industries)))
     chartGroup.append("g")
         .call(leftAxis);
 
