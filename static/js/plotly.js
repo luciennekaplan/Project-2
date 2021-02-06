@@ -3,9 +3,10 @@ function handleSubmit() {
     d3.event.preventDefault();
 
     // Select the input value from the form
-    var subject = d3.select("#dropdown-menu").node().value;
-    console.log(subject)
+    var subjurlect = d3.select("#option").node().value;
+    console.log(subject);
     // Update the Dashboard!
+    buildSalaryChart(url);
 }
 
 function buildSalaryChart(url) {
@@ -15,6 +16,7 @@ function buildSalaryChart(url) {
         for (const [key, value] of Object.entries(theData)) {
             salary = value.map(d => (parseInt(d.salaryHigh) +
                 parseInt(d.salaryLow)) / 2);
+            if (key === 'result') {key = url}
             var trace = {
                 x: salary,
                 name: key.slice(5),
@@ -78,4 +80,4 @@ function pickColor(type) {
     }
 }
 buildSalaryChart("/all");
-d3.selectAll("#dropdown-menu").on("change", handleSubmit);
+d3.selectAll("#option").on("change", handleSubmit);
