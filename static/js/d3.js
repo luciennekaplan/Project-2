@@ -513,3 +513,20 @@ d3.selectAll("option").on("click", function () {
     svg.remove()
     updateDash(url)
 })
+
+var both = "/all"
+
+d3.json(both).then(data => {
+    console.log(data)
+
+    data.CleanDataAnalyst.forEach((d, i) => {
+        if (d.industry in industries) {
+            //this is basically saying "if the industry is already in our keys, add 1 to the value"
+            industries[d.industry] += 1;
+        }
+        else {
+            // and this one is saying "if this industry isn't already in our keys then make it a key and give it the value of 1"
+            industries[d.industry] = 1;
+        }
+    })
+})
