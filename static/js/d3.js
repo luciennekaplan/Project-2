@@ -24,7 +24,7 @@ var svg = d3.select("#industrybar")
 var chartGroup = svg.append("g")
     .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
-var url = "/data-analyst"
+var url = "/business-analyst"
 d3.json(url).then(function(data) {
     console.log(data)
     var industries = {};
@@ -84,8 +84,19 @@ d3.json(url).then(function(data) {
         .attr("x", 9)
         .attr("dy", ".35em")
         .attr("transform", "rotate(25)")
-        .style("text-anchor", "start");
-
+        .style("text-anchor", "start")
+        
+    function truncateText(d) {
+        d3.selectAll("text")
+            .text(function (d) {
+                console.log(d)
+                if(d.length > 5)
+                    return d.substring(0,10)+'...';
+                else
+                    return d;                       
+            });
+    }
+    truncateText()
     var toolTip = d3.tip()
         .attr("class", "d3-tip")
         .offset([-3, 0])
@@ -146,6 +157,12 @@ d3.json(url).then(function(data) {
             .classed("active x", true);
         tenToTwentyAxis.classed("inactive", true)
             .classed("active x", false);
+        twentyToThirtyAxis.classed("inactive", true)
+            .classed("active x", false);
+        thirtyToFortyAxis.classed("inactive", true)
+            .classed("active x", false);
+        fortyToFiftyAxis.classed("inactive", true)
+            .classed("active x", false);
         console.log(topTen)
         
         xScale = d3.scaleBand()
@@ -190,6 +207,8 @@ d3.json(url).then(function(data) {
             .attr("height", d => height - yScale(d.count))
             .on("mouseover", toolTip.show)
             .on("mouseout", toolTip.hide);
+
+        setTimeout(function() {truncateText()}, 500)
     })
 
     tenToTwentyAxis.on("click", function (d) {
@@ -197,6 +216,12 @@ d3.json(url).then(function(data) {
             .classed("active x", false);
         tenToTwentyAxis.classed("inactive", false)
             .classed("active x", true);
+        twentyToThirtyAxis.classed("inactive", true)
+            .classed("active x", false);
+        thirtyToFortyAxis.classed("inactive", true)
+            .classed("active x", false);
+        fortyToFiftyAxis.classed("inactive", true)
+            .classed("active x", false);
         console.log(tenToTwenty)
         
         xScale = d3.scaleBand()
@@ -241,6 +266,8 @@ d3.json(url).then(function(data) {
             .attr("height", d => height - yScale(d.count))
             .on("mouseover", toolTip.show)
             .on("mouseout", toolTip.hide);
+
+        setTimeout(function() {truncateText()}, 500)
     })
 
     twentyToThirtyAxis.on("click", function (d) {
@@ -300,6 +327,8 @@ d3.json(url).then(function(data) {
             .attr("height", d => height - yScale(d.count))
             .on("mouseover", toolTip.show)
             .on("mouseout", toolTip.hide);
+
+        setTimeout(function() {truncateText()}, 500)
     })
 
 
@@ -360,6 +389,8 @@ d3.json(url).then(function(data) {
             .attr("height", d => height - yScale(d.count))
             .on("mouseover", toolTip.show)
             .on("mouseout", toolTip.hide);
+
+        setTimeout(function() {truncateText()}, 500)
     })
 
 
@@ -420,5 +451,7 @@ d3.json(url).then(function(data) {
             .attr("height", d => height - yScale(d.count))
             .on("mouseover", toolTip.show)
             .on("mouseout", toolTip.hide);
+
+        setTimeout(function() {truncateText()}, 500)
     })
 })
