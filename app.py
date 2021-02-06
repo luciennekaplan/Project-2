@@ -53,5 +53,15 @@ def bizAnalyst():
     
     return jsonify({'result':output})
 
+@app.route("/all")
+def all():
+    collections = mongo.db.collection_names()
+    output = {}
+    for table in collections:
+        data = mongo.db.get_collection(table).find()
+        output[table] = getData(data,[])
+
+    return jsonify(output)
+
 if __name__ == "__main__":
     app.run(debug=True)

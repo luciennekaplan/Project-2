@@ -1,12 +1,14 @@
-var url = "/business-analyst"
+var url = "/all"
 
 d3.json(url).then(function (theData) {
-    salaryMid = theData.result.map(
-        d => (parseInt(d.salaryHigh) + parseInt(d.salaryLow))/2);
+    salaryData = theData.CleanDataAnalyst.map(
+        d => (parseInt(d.salaryHigh) + parseInt(d.salaryLow)) / 2);
+    salaryBiz = theData.CleanBusinessAnalyst.map(
+        d => (parseInt(d.salaryHigh) + parseInt(d.salaryLow)) / 2);
 
     var trace1 = {
-        x: theData.result.map(d => d.salaryHigh),
-        name: 'High',
+        x: salaryBiz,
+        name: 'Business Analyst',
         type: 'histogram',
         marker: {
             color: "rgba(255, 100, 102, 0.7)",
@@ -18,8 +20,8 @@ d3.json(url).then(function (theData) {
         opacity: 0.5
     };
     var trace2 = {
-        x: theData.result.map(d => d.salaryLow),
-        name: 'Low',
+        x: salaryData,
+        name: 'Data Analyst',
         type: 'histogram',
         marker: {
             color: "rgba(100, 200, 102, 0.7)",
