@@ -149,6 +149,8 @@ function updateDash(link) {
             });
         svg.call(toolTip);
 
+        var type = labelChart("result",url)
+
         // then we add the bars to the bar chart with the data we need
         chartGroup.selectAll(".indusbar")
             .data(topTen)
@@ -159,6 +161,7 @@ function updateDash(link) {
             .attr("y", d => yScale(d.count))
             .attr("width", xScale.bandwidth())
             .attr("height", d => height - yScale(d.count))
+            .attr("fill", pickColor(type)["fill"])
             .on("mouseover", toolTip.show)
             .on("mouseout", toolTip.hide);
 
@@ -252,6 +255,7 @@ function updateDash(link) {
                 .attr("y", d => yScale(d.count))
                 .attr("width", xScale.bandwidth())
                 .attr("height", d => height - yScale(d.count))
+                .attr("fill", pickColor(type)["fill"])
                 .on("mouseover", toolTip.show)
                 .on("mouseout", toolTip.hide);
 
@@ -311,6 +315,7 @@ function updateDash(link) {
                 .attr("y", d => yScale(d.count))
                 .attr("width", xScale.bandwidth())
                 .attr("height", d => height - yScale(d.count))
+                .attr("fill", pickColor(type)["fill"])
                 .on("mouseover", toolTip.show)
                 .on("mouseout", toolTip.hide);
 
@@ -372,6 +377,7 @@ function updateDash(link) {
                 .attr("y", d => yScale(d.count))
                 .attr("width", xScale.bandwidth())
                 .attr("height", d => height - yScale(d.count))
+                .attr("fill", pickColor(type)["fill"])
                 .on("mouseover", toolTip.show)
                 .on("mouseout", toolTip.hide);
 
@@ -434,6 +440,7 @@ function updateDash(link) {
                 .attr("y", d => yScale(d.count))
                 .attr("width", xScale.bandwidth())
                 .attr("height", d => height - yScale(d.count))
+                .attr("fill", pickColor(type)["fill"])
                 .on("mouseover", toolTip.show)
                 .on("mouseout", toolTip.hide);
 
@@ -496,6 +503,7 @@ function updateDash(link) {
                 .attr("y", d => yScale(d.count))
                 .attr("width", xScale.bandwidth())
                 .attr("height", d => height - yScale(d.count))
+                .attr("fill", pickColor(type)["fill"])
                 .on("mouseover", toolTip.show)
                 .on("mouseout", toolTip.hide);
 
@@ -564,7 +572,9 @@ function groupedBar(link) {
                 name: d,
                 count: { "Business Analyst": baCount[i] }
             }
-
+            if (!(daNames.includes(d))) {
+                dicty.count["Data Analyst"] = 0
+            }
             // then push it to the array that we initialized
             combinedListDict.push(dicty)
         })
@@ -574,7 +584,19 @@ function groupedBar(link) {
                     e.count["Data Analyst"] = daCount[i]
                 }
             })
+            
+            if (!(baNames.includes(d))) {
+                var dicty = {
+                    name: d,
+                    count: {
+                        "Data Analyst": daCount[i],
+                        "Business Analyst": 0
+                        }
+                }
+                combinedListDict.push(dicty)
+            }
         })
+        
         // then we log it to make sure it matches up with the frequency count we did before
         console.log(combinedListDict)
 
