@@ -7,7 +7,7 @@ var margin = {
     top: 50,
     right: 60,
     bottom: 100,
-    left: 100
+    left: 50
 };
 
 // this is to set the height and width of the chart inside of the svg 
@@ -18,7 +18,7 @@ var height = svgHeight - margin.top - margin.bottom;
 var svg;
 
 // we have this to use as our initial data route to build the industry bar chart
-var url = "/data-analyst"
+var url = "/all"
 
 // and here we have our function that builds the bar chart
 function updateDash(link) {
@@ -56,7 +56,7 @@ function updateDash(link) {
 
         // and then let's log it so we can see if anything messed up
         console.log(industries)
-        
+
         // then because we want to work with the keys too we need to put them in an array of objects
         // so here we put both the keys and values into their own arrays
         var industryName = Object.keys(industries)
@@ -128,9 +128,9 @@ function updateDash(link) {
         // this function is here because some of the industry names are super long and they run off the svg element, 
         // so we shorten them and add an elipses (...)
         function truncateText(d) {
-            d3.selectAll("text")
+            d3.select(".xAxis")
+                .selectAll("text")
                 .text(function (d) {
-                    console.log(d)
                     if (d.length > 5)
                         return d.substring(0, 10) + '...';
                     else
@@ -174,28 +174,28 @@ function updateDash(link) {
             .attr("transform", `translate(${(width / 2) - 20}, ${height + margin.top})`)
             .attr("text-anchor", "middle")
             .attr("font-size", "16px")
-            .classed("inactive", true) 
+            .classed("inactive", true)
             .text("2");
 
         var twentyToThirtyAxis = chartGroup.append("text")
             .attr("transform", `translate(${(width / 2) - 10}, ${height + margin.top})`)
             .attr("text-anchor", "middle")
             .attr("font-size", "16px")
-            .classed("inactive", true) 
+            .classed("inactive", true)
             .text("3");
 
         var thirtyToFortyAxis = chartGroup.append("text")
             .attr("transform", `translate(${(width / 2)}, ${height + margin.top})`)
             .attr("text-anchor", "middle")
             .attr("font-size", "16px")
-            .classed("inactive", true) 
+            .classed("inactive", true)
             .text("4");
 
         var fortyToFiftyAxis = chartGroup.append("text")
             .attr("transform", `translate(${(width / 2) + 10}, ${height + margin.top})`)
             .attr("text-anchor", "middle")
             .attr("font-size", "16px")
-            .classed("inactive", true) 
+            .classed("inactive", true)
             .text("5");
 
         // Then we have all of our listeners to update the bar chart
@@ -505,28 +505,199 @@ function updateDash(link) {
 }
 
 // then we call the function to initialize the chart on page load
-updateDash(url)
+// updateDash(url)
 
+
+
+
+function groupedBar(link) {
+    d3.json(link).then(data => {
+        console.log(data)
+
+        svg = d3.select("#industrybar")
+            .append("svg")
+            .attr("height", svgHeight)
+            .attr("width", svgWidth);
+
+        // This is where we add the group element to the svg, this is where our chart is going to go
+        var chartGroup = svg.append("g")
+            .attr("transform", `translate(${margin.left}, ${margin.top})`);
+
+
+        var daIndustry = {}
+        data.CleanDataAnalyst.forEach((d, i) => {
+            if (d.industry in daIndustry) {
+                //this is basically saying "if the industry is already in our keys, add 1 to the value"
+                daIndustry[d.industry] += 1;
+            }
+            else {
+                // and this one is saying "if this industry isn't already in our keys then make it a key and give it the value of 1"
+                daIndustry[d.industry] = 1;
+            }
+        })
+
+        var baIndustry = {}
+        data.CleanBusinessAnalyst.forEach((d, i) => {
+            if (d.industry in baIndustry) {
+                //this is basically saying "if the industry is already in our keys, add 1 to the value"
+                baIndustry[d.industry] += 1;
+            }
+            else {
+                // and this one is saying "if this industry isn't already in our keys then make it a key and give it the value of 1"
+                baIndustry[d.industry] = 1;
+            }
+        })
+        console.log("daIndustry", daIndustry)
+        console.log("baIndustry", baIndustry)
+
+        var baNames = Object.keys(baIndustry)
+        var baCount = Object.values(baIndustry)
+        var daNames = Object.keys(daIndustry)
+        var daCount = Object.values(daIndustry)
+
+        var combinedListDict = []
+
+        // and then we loop through one of the arrays above, getting the index as well as the item
+        baNames.forEach((d, i) => {
+            // then we make an object, and put both the industry name and frequency count into it
+            var dicty = {
+                name: d,
+                count: { "Business Analyst": baCount[i] }
+            }
+
+            // then push it to the array that we initialized
+            combinedListDict.push(dicty)
+        })
+        daNames.forEach((d, i) => {
+            combinedListDict.forEach((e, j) => {
+                if (d === e.name) {
+                    e.count["Data Analyst"] = daCount[i]
+                }
+            })
+        })
+        // then we log it to make sure it matches up with the frequency count we did before
+        console.log(combinedListDict)
+
+        var sortedDictsCombined = combinedListDict.sort(function (a, b) {
+            return b.count["Business Analyst"] - a.count["Business Analyst"]
+        })
+        console.log(sortedDictsCombined)
+        var combinedTopTen = sortedDictsCombined.slice(0, 10)
+        var xScaleAll = d3.scaleBand()
+            .domain(combinedTopTen.map(d => d.name))
+            .range([0, width])
+            .padding(0.1);
+        var subs = Object.keys(combinedTopTen[0].count)
+        console.log(subs)
+        var xScaleSub = d3.scaleBand()
+            .domain(subs)
+            .range([0, xScaleAll.bandwidth()])
+            .padding(0.1)
+
+        var colors = d3.scaleOrdinal()
+            .domain(subs)
+            .range([ "rgba(100, 200, 102, 0.7)","rgba(255, 100, 102, 0.7)"])
+
+        var yScale = d3.scaleLinear()
+            .domain([0, d3.max(combinedTopTen, d => d.count["Business Analyst"])])
+            .range([height, 0]);
+
+
+        // then we assign them their own variables
+        var bottomAxis = d3.axisBottom(xScaleAll);
+        var leftAxis = d3.axisLeft(yScale);
+
+        // and call them
+        chartGroup.append("g")
+            .classed("yAxis", true)
+            .call(leftAxis);
+
+        chartGroup.append("g")
+            .attr("transform", `translate(0, ${height})`)
+            .classed("xAxis", true)
+            .call(bottomAxis)
+            .selectAll("text") // this section here is needed to rotate the tick values so theyre not running over each other
+            .attr("y", 0)
+            .attr("x", 9)
+            .attr("dy", ".35em")
+            .attr("transform", "rotate(25)")
+            .style("text-anchor", "start")
+
+        // this function is here because some of the industry names are super long and they run off the svg element, 
+        // so we shorten them and add an elipses (...)
+        function truncateText(d) {
+            d3.select(".xAxis").selectAll("text")
+                .text(function (d) {
+                    if (d.length > 5)
+                        return d.substring(0, 10) + '...';
+                    else
+                        return d;
+                });
+        }
+        // then we call the function
+        truncateText()
+
+        // then we add our tooltips
+        var toolTip = d3.tip()
+            .attr("class", "d3-tip")
+            .offset([-3, 0])
+            .html(function (d) {
+                return `${d.name} <br> # of jobs: ${d.value}`;
+            });
+        svg.call(toolTip);
+
+
+
+
+        chartGroup.append("g")
+            .selectAll("g")
+            // Enter in data = loop group per group
+            .data(combinedTopTen)
+            .enter()
+            .append("g")
+            .attr("transform", function (d) { return "translate(" + xScaleAll(d.name) + ",0)"; })
+            .selectAll("rect")
+            .data(function (d) { return subs.map(function (key) { return { name: d.name, key: key, value: d["count"][key] }; }); })
+            .enter().append("rect")
+            .attr("x", function (d) { return xScaleSub(d.key); })
+            .attr("y", function (d) { return yScale(d.value); })
+            .attr("width", xScaleSub.bandwidth())
+            .attr("height", function (d) { return height - yScale(d.value); })
+            .attr("fill", function (d) { return colors(d.key); })
+            .on("mouseover", toolTip.show)
+            .on("mouseout", toolTip.hide);
+
+
+        var legend = chartGroup.selectAll(".legend")
+            .data(subs)
+            .enter().append("g")
+            .attr("class", "legend")
+            .attr("transform", function (d, i) { return "translate(0," + i * 20 + ")"; })
+            .style("opacity", "1");
+
+        legend.append("rect")
+            .attr("x", width - 18)
+            .attr("width", 18)
+            .attr("height", 18)
+            .style("fill", function (d) { return colors(d); });
+
+        legend.append("text")
+            .attr("x", width - 24)
+            .attr("y", 9)
+            .attr("dy", ".35em")
+            .style("text-anchor", "end")
+            .text(function (d) { return d; });
+    })
+}
+groupedBar(url)
 // and here we have a listener to change the dataset we're looking at
 d3.selectAll("option").on("click", function () {
     url = d3.select(this).property("value")
     svg.remove()
-    updateDash(url)
-})
-
-var both = "/all"
-
-d3.json(both).then(data => {
-    console.log(data)
-
-    data.CleanDataAnalyst.forEach((d, i) => {
-        if (d.industry in industries) {
-            //this is basically saying "if the industry is already in our keys, add 1 to the value"
-            industries[d.industry] += 1;
-        }
-        else {
-            // and this one is saying "if this industry isn't already in our keys then make it a key and give it the value of 1"
-            industries[d.industry] = 1;
-        }
-    })
+    if (url === "/all") {
+        groupedBar(url)
+    }
+    else {
+        updateDash(url)
+    }
 })
