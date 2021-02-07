@@ -505,7 +505,7 @@ function updateDash(link) {
 }
 
 // then we call the function to initialize the chart on page load
-updateDash(url)
+// updateDash(url)
 
 // and here we have a listener to change the dataset we're looking at
 d3.selectAll("option").on("click", function () {
@@ -519,14 +519,157 @@ var both = "/all"
 d3.json(both).then(data => {
     console.log(data)
 
+    svg = d3.select("#industrybar")
+            .append("svg")
+            .attr("height", svgHeight)
+            .attr("width", svgWidth);
+
+        // This is where we add the group element to the svg, this is where our chart is going to go
+    var chartGroup = svg.append("g")
+        .attr("transform", `translate(${margin.left}, ${margin.top})`);
+
+
+    var daIndustry = {}
     data.CleanDataAnalyst.forEach((d, i) => {
-        if (d.industry in industries) {
+        if (d.industry in daIndustry) {
             //this is basically saying "if the industry is already in our keys, add 1 to the value"
-            industries[d.industry] += 1;
+            daIndustry[d.industry] += 1;
         }
         else {
             // and this one is saying "if this industry isn't already in our keys then make it a key and give it the value of 1"
-            industries[d.industry] = 1;
+            daIndustry[d.industry] = 1;
         }
     })
+
+    var baIndustry = {}
+    data.CleanBusinessAnalyst.forEach((d, i) => {
+        if (d.industry in baIndustry) {
+            //this is basically saying "if the industry is already in our keys, add 1 to the value"
+            baIndustry[d.industry] += 1;
+        }
+        else {
+            // and this one is saying "if this industry isn't already in our keys then make it a key and give it the value of 1"
+            baIndustry[d.industry] = 1;
+        }
+    })
+    console.log("daIndustry", daIndustry)
+    console.log("baIndustry", baIndustry)
+
+    var baNames = Object.keys(baIndustry)
+    var baCount = Object.values(baIndustry)
+    var daNames = Object.keys(daIndustry)
+    var daCount = Object.values(daIndustry)
+
+    var combinedListDict = []
+    
+        // and then we loop through one of the arrays above, getting the index as well as the item
+        baNames.forEach((d, i) => {
+            // then we make an object, and put both the industry name and frequency count into it
+            var dicty = {
+                name: d,
+                count: {ba: baCount[i]}
+            }
+
+            // then push it to the array that we initialized
+            combinedListDict.push(dicty)
+        })
+        daNames.forEach((d,i) => {
+            combinedListDict.forEach((e,j) =>{
+                if (d === e.name) {
+                    e.count["da"] = daCount[i]
+                }
+            })
+        })
+        // then we log it to make sure it matches up with the frequency count we did before
+        console.log(combinedListDict)
+
+        var sortedDictsCombined = combinedListDict.sort(function (a, b) {
+            return b.count.ba - a.count.ba
+        })
+        console.log(sortedDictsCombined)
+        var combinedTopTen = sortedDictsCombined.slice(0,10)
+        var xScaleAll = d3.scaleBand()
+        .domain(combinedTopTen.map(d => d.name))
+        .range([0, width])
+        .padding(0.1);
+        var subs = Object.keys(combinedTopTen[0].count)
+        console.log(subs)
+        var xScaleSub = d3.scaleBand()
+            .domain(subs)
+            .range([0, xScaleAll.bandwidth()])
+            .padding(0.1)
+
+        var colors = d3.scaleOrdinal()
+            .domain(subs)
+            .range(["rgba(255, 100, 102, 0.7)", "rgba(100, 200, 102, 0.7)"])
+
+        var yScale = d3.scaleLinear()
+        .domain([0, d3.max(combinedTopTen, d => d.count.ba)])
+        .range([height, 0]);
+
+
+        // then we assign them their own variables
+        var bottomAxis = d3.axisBottom(xScaleAll);
+        var leftAxis = d3.axisLeft(yScale);
+
+        // and call them
+        chartGroup.append("g")
+            .classed("yAxis", true)
+            .call(leftAxis);
+
+        chartGroup.append("g")
+            .attr("transform", `translate(0, ${height})`)
+            .classed("xAxis", true)
+            .call(bottomAxis)
+            .selectAll("text") // this section here is needed to rotate the tick values so theyre not running over each other
+            .attr("y", 0)
+            .attr("x", 9)
+            .attr("dy", ".35em")
+            .attr("transform", "rotate(25)")
+            .style("text-anchor", "start")
+
+        // this function is here because some of the industry names are super long and they run off the svg element, 
+        // so we shorten them and add an elipses (...)
+        function truncateText(d) {
+            d3.select(".xAxis").selectAll("text")
+                .text(function (d) {
+                    console.log(d)
+                    if (d.length > 5)
+                        return d.substring(0, 10) + '...';
+                    else
+                        return d;
+                });
+        }
+        // then we call the function
+        truncateText()
+
+        // then we add our tooltips
+        var toolTip = d3.tip()
+            .attr("class", "d3-tip")
+            .offset([-3, 0])
+            .html(function (d) {
+                return `${d.name} <br> # of jobs: ${d.value}`;
+            });
+        svg.call(toolTip);
+
+        
+            
+
+        chartGroup.append("g")
+            .selectAll("g")
+            // Enter in data = loop group per group
+            .data(combinedTopTen)
+            .enter()
+            .append("g")
+              .attr("transform", function(d) { return "translate(" + xScaleAll(d.name) + ",0)"; })
+            .selectAll("rect")
+            .data(function(d) { return subs.map(function(key) { return console.log(d, key, d.key), {name: d.name, key: key, value: d["count"][key]}; }); })
+            .enter().append("rect")
+              .attr("x", function(d) { return xScaleSub(d.key); })
+              .attr("y", function(d) { return yScale(d.value); })
+              .attr("width", xScaleSub.bandwidth())
+              .attr("height", function(d) { return height - yScale(d.value); })
+              .attr("fill", function(d) { return colors(d.key); })
+              .on("mouseover", toolTip.show)
+              .on("mouseout", toolTip.hide);
 })
