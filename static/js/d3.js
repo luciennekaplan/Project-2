@@ -596,7 +596,7 @@ function groupedBar(link) {
 
         var colors = d3.scaleOrdinal()
             .domain(subs)
-            .range(["rgba(255, 100, 102, 0.7)", "rgba(100, 200, 102, 0.7)"])
+            .range([ "rgba(100, 200, 102, 0.7)","rgba(255, 100, 102, 0.7)"])
 
         var yScale = d3.scaleLinear()
             .domain([0, d3.max(combinedTopTen, d => d.count["Business Analyst"])])
@@ -657,7 +657,7 @@ function groupedBar(link) {
             .append("g")
             .attr("transform", function (d) { return "translate(" + xScaleAll(d.name) + ",0)"; })
             .selectAll("rect")
-            .data(function (d) { return subs.map(function (key) { return console.log(d, key, d.key), { name: d.name, key: key, value: d["count"][key] }; }); })
+            .data(function (d) { return subs.map(function (key) { return { name: d.name, key: key, value: d["count"][key] }; }); })
             .enter().append("rect")
             .attr("x", function (d) { return xScaleSub(d.key); })
             .attr("y", function (d) { return yScale(d.value); })
@@ -689,7 +689,7 @@ function groupedBar(link) {
             .text(function (d) { return d; });
     })
 }
-
+groupedBar(url)
 // and here we have a listener to change the dataset we're looking at
 d3.selectAll("option").on("click", function () {
     url = d3.select(this).property("value")
@@ -701,4 +701,3 @@ d3.selectAll("option").on("click", function () {
         updateDash(url)
     }
 })
-groupedBar(url)

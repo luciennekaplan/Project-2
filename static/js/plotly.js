@@ -91,4 +91,11 @@ d3.selectAll("option").on("click", function () {
     d3.event.preventDefault();
     url = d3.select(this).property("value")
     buildSalaryChart(url);
+    svg.remove()
+    if (url === "/all") {
+        groupedBar(url)
+    }
+    else {
+        updateDash(url)
+    }
 })
