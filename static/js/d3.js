@@ -100,16 +100,16 @@ function updateDash(link, city) {
         if (sortedDicts.length > 10) {
             var topTen = sortedDicts.slice(0, 10);
         }
-        if (sortedDicts.length > 20) {
+        if (sortedDicts.length >= 11) {
             var tenToTwenty = sortedDicts.slice(10, 20);
         }
-        if (sortedDicts.length > 30) {
+        if (sortedDicts.length >= 21) {
             var twentyToThirty = sortedDicts.slice(20, 30);
         }
-        if (sortedDicts.length > 40) {
+        if (sortedDicts.length >= 31) {
             var thirtyToForty = sortedDicts.slice(30, 40);
         }
-        if (sortedDicts.length > 50) {
+        if (sortedDicts.length >= 41) {
             var fortyToFifty = sortedDicts.slice(40, 50);
         }
         if (sortedDicts.length > 10) {
@@ -304,7 +304,7 @@ function updateDash(link, city) {
                 listenerUpdate(topTen);
             });
         }
-        if (sortedDicts.length > 20) {
+        if (sortedDicts.length >= 11) {
             var tenToTwentyAxis = chartGroup.append("text")
                 .attr("transform", `translate(${(width / 2) - 20}, ${height + margin.top})`)
                 .attr("text-anchor", "middle")
@@ -322,7 +322,7 @@ function updateDash(link, city) {
                 listenerUpdate(tenToTwenty);
             });
         }
-        if (sortedDicts.length > 30) {
+        if (sortedDicts.length >= 21) {
             var twentyToThirtyAxis = chartGroup.append("text")
                 .attr("transform", `translate(${(width / 2) - 10}, ${height + margin.top})`)
                 .attr("text-anchor", "middle")
@@ -341,7 +341,7 @@ function updateDash(link, city) {
             });
         }
 
-        if (sortedDicts.length > 40) {
+        if (sortedDicts.length >= 31) {
             var thirtyToFortyAxis = chartGroup.append("text")
                 .attr("transform", `translate(${(width / 2)}, ${height + margin.top})`)
                 .attr("text-anchor", "middle")
@@ -360,7 +360,7 @@ function updateDash(link, city) {
             });
         }
 
-        if (sortedDicts.length > 50) {
+        if (sortedDicts.length >= 41) {
             var fortyToFiftyAxis = chartGroup.append("text")
                 .attr("transform", `translate(${(width / 2) + 10}, ${height + margin.top})`)
                 .attr("text-anchor", "middle")
@@ -504,16 +504,16 @@ function groupedBar(link, city) {
         if (sortedDictsCombined.length > 10) {
             var combinedTopTen = sortedDictsCombined.slice(0, 10);
         }
-        if (sortedDictsCombined.length > 10) {
+        if (sortedDictsCombined.length >= 11) {
             var comTenTwenty = sortedDictsCombined.slice(10, 20);
         }
-        if (sortedDictsCombined.length > 30) {
+        if (sortedDictsCombined.length >= 21) {
             var comTwentyThirty = sortedDictsCombined.slice(20, 30);
         }
-        if (sortedDictsCombined.length > 40) {
+        if (sortedDictsCombined.length >= 31) {
             var comThirtyForty = sortedDictsCombined.slice(30, 40);
         }
-        if (sortedDictsCombined.length > 50) {
+        if (sortedDictsCombined.length >= 41) {
             var comFortyFifty = sortedDictsCombined.slice(40, 50);
         }
         // now we set up our chart
@@ -775,7 +775,7 @@ function groupedBar(link, city) {
             });
         }
 
-        if (sortedDictsCombined.length > 10) {
+        if (sortedDictsCombined.length >= 11) {
             var comTenTwentyAxis = chartGroup.append("text")
                 .attr("transform", `translate(${(width / 2) - 20}, ${height + margin.top})`)
                 .attr("text-anchor", "middle")
@@ -793,7 +793,7 @@ function groupedBar(link, city) {
                 groupedUpdate(comTenTwenty);
             });
         }
-        if (sortedDictsCombined.length > 30) {
+        if (sortedDictsCombined.length >= 21) {
             var comTwentyThirtyAxis = chartGroup.append("text")
                 .attr("transform", `translate(${(width / 2) - 10}, ${height + margin.top})`)
                 .attr("text-anchor", "middle")
@@ -811,7 +811,7 @@ function groupedBar(link, city) {
                 groupedUpdate(comTwentyThirty);
             });
         }
-        if (sortedDictsCombined.length > 40) {
+        if (sortedDictsCombined.length >= 31) {
             var comThirtyFortyAxis = chartGroup.append("text")
                 .attr("transform", `translate(${(width / 2)}, ${height + margin.top})`)
                 .attr("text-anchor", "middle")
@@ -829,7 +829,7 @@ function groupedBar(link, city) {
                 groupedUpdate(comThirtyForty);
             });
         }
-        if (sortedDictsCombined.length > 50) {
+        if (sortedDictsCombined.length >= 41) {
             var comFortyFiftyAxis = chartGroup.append("text")
                 .attr("transform", `translate(${(width / 2) + 10}, ${height + margin.top})`)
                 .attr("text-anchor", "middle")
