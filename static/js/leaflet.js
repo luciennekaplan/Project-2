@@ -1,80 +1,148 @@
 const API_KEY = "AIzaSyBYbCDB_gjy4zEU8tCwlyRWbLAGd_7ii-0";
+// Route to data analyst data
 var analyst_data = "/data-analyst";
+// Route to busines analyst data
 var business_data = "/business-analyst";
 
 
+// Create layer group
 analystLayer = new L.LayerGroup()
-d3.json(analyst_data).then(function(data) {
+data_city_counts = {}
+// Grab Data Analyst data
+d3.json(analyst_data).then(function (data) {
     analyst_locations = []
-    coordinates = []
-    data.result.forEach(function(d) {
+    city_coordinates = {}
+    // Grab all of the locations from the data set and save to array
+    data.result.forEach(function (d) {
         analyst_locations.push(d.location);
     });
+    // Create function to count occurrence of a city in an array 
+    function countCity(city) {
+        if (city in data_city_counts) {
+            data_city_counts[city] += 1;
+        }
+        else {
+            data_city_counts[city] = 1;
+        }
+    }
+    // Function that will take our function from above and loop through our original data
+    function countCities(array) {
+        array.forEach(countCity);
+        return data_city_counts;
+    }
+    countCities(analyst_locations);
+    // Function to count unique values in array
     const unique = (value, index, self) => {
         return self.indexOf(value) === index
-      }
-    
+    }
+    // Find our unique cities and save to array
     const unique_analyst_locations = analyst_locations.filter(unique)
-        unique_analyst_locations.forEach(function(d) {
-            d = d.split(',')[0];
-            var address = d;
-            address = address.replace(/\s+/g, '');
-            var coordinate_url = `https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=${API_KEY}`;
-            d3.json(coordinate_url).then(function(d) {
-                try {
-                coordinates.push([d.results[0].geometry.location.lat, d.results[0].geometry.location.lng]);
-                }
-                catch (TypeError) {
-                    console.log("Data not found")
-                }
-                coordinates.forEach(function(d) {
-                    return new L.CircleMarker(d, {
-                        radius: 10,
-                        color: 'black',
-                        fillColor: 'blue',
-                        stroke: false,
-                        fillOpacity: 0.5
-                      }).addTo(analystLayer);
-                });
+    // Loop through our list of unique locations 
+    unique_analyst_locations.forEach(function (d) {
+        // Take location and format it for API call
+        var address = d;
+        var url_address = address.split(" ").join("");
+        url_address = address.replace(",", "");
+        // API call to find geocoordinates of each city
+        var coordinate_url = `https://maps.googleapis.com/maps/api/geocode/json?address=${url_address}&key=${API_KEY}`;
+        // Save city and coordinates to object 
+        d3.json(coordinate_url).then(function (d) {
+            try {
+                city_coordinates[address] = ([d.results[0].geometry.location.lat, d.results[0].geometry.location.lng]);
+            }
+            catch (TypeError) {
+                console.log("City not found, skipping");
+            }
+            //Grab just the coordinate values from our object of locations/coordinates 
+            just_coordinates = Object.values(city_coordinates);
+            // Turn each set of coordinates into a circle marker!
+            just_coordinates.forEach(function (d) {
+                // Grab the name of the location tied to the coordinates and save to variable to display in our tooltip
+                tooltip_location = Object.keys(city_coordinates).find(key => city_coordinates[key] === d);
+                // Grab the number of times each location shows up in our original data (AKA number of job listings for each city), save for tooltip display
+                tooltip_number = Object.values(data_city_counts).find(value => data_city_counts[value] === tooltip_location);
+                return new L.CircleMarker(d, {
+                    radius: 10,
+                    color: 'black',
+                    fillColor: 'lightgreen',
+                    stroke: false,
+                    fillOpacity: 0.5
+                    // Bind and open our tooltip, add marker to our Data Analyst marker layer group
+                }).bindTooltip(`${tooltip_location}` + "<br>" + `${tooltip_number}`)
+                .openTooltip().addTo(analystLayer);
             });
         });
+    });
 });
 
+//Create layer group
 businessLayer = new L.LayerGroup()
-d3.json(business_data).then(function(data) {
+business_city_counts = {}
+// Grab Business Analyst data
+d3.json(business_data).then(function (data) {
     business_locations = []
-    coordinates = []
-    data.result.forEach(function(d) {
+    city_coordinates = {}
+    // Grab all of the locations from the data set and save to array
+    data.result.forEach(function (d) {
         business_locations.push(d.location);
     });
+    // Create function to count occurrence of a city in an array 
+    function countCity(city) {
+        if (city in business_city_counts) {
+            business_city_counts[city] += 1;
+        }
+        else {
+            business_city_counts[city] = 1;
+        }
+    }
+    // Function that will take our function from above and loop through our original data
+    function countCities(array) {
+        array.forEach(countCity);
+        return business_city_counts;
+    }
+    countCities(business_locations);
+    // Function to count unique values in array
     const unique = (value, index, self) => {
         return self.indexOf(value) === index
-      }
-    
+    }
+    // Find our unique cities and save to array
     const unique_business_locations = business_locations.filter(unique)
-        unique_business_locations.forEach(function(d) {
-            d = d.split(',')[0];
-            var address = d;
-            address = address.replace(/\s+/g, '');
-            var coordinate_url = `https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=${API_KEY}`;
-            d3.json(coordinate_url).then(function(d) {
-                try {
-                coordinates.push([d.results[0].geometry.location.lat, d.results[0].geometry.location.lng]);
-                }
-                catch (TypeError) {
-                    console.log("Data not found")
-                }
-                coordinates.forEach(function(d) {
-                    return new L.CircleMarker(d, {
-                        radius: 10,
-                        color: 'black',
-                        fillColor: 'green',
-                        stroke: false,
-                        fillOpacity: 0.5
-                    }).addTo(businessLayer);
-                });
+    // Loop through our list of unique locations 
+    unique_business_locations.forEach(function (d) {
+        // Take location and format it for API call
+        var address = d;
+        var url_address = address.split(" ").join("");
+        url_address = address.replace(",", "");
+        // API call to find geocoordinates of each city
+        var coordinate_url = `https://maps.googleapis.com/maps/api/geocode/json?address=${url_address}&key=${API_KEY}`;
+        // Save city and coordinates to object 
+        d3.json(coordinate_url).then(function (d) {
+            try {
+                city_coordinates[d.results[0].formatted_address] = ([d.results[0].geometry.location.lat, d.results[0].geometry.location.lng]);
+            }
+            catch (TypeError) {
+                console.log("City not found, skipping");
+            }
+            //Grab just the coordinate values from our object of locations/coordinates
+            just_coordinates = Object.values(city_coordinates);
+            // Turn each set of coordinates into a circle marker!
+            just_coordinates.forEach(function (d) {
+                // Grab the name of the location tied to the coordinates and save to variable to display in our tooltip
+                tooltip_location = Object.keys(city_coordinates).find(key => city_coordinates[key] === d);
+                // Grab the number of times each location shows up in our original data (AKA number of job listings for each city), save for tooltip display
+                tooltip_number = Object.values(business_city_counts).find(value => business_city_counts[value] === tooltip_location);
+                return new L.CircleMarker(d, {
+                    radius: 10,
+                    color: 'black',
+                    fillColor: 'lightcoral',
+                    stroke: false,
+                    fillOpacity: 0.5
+                // Bind and open our tooltip, add marker to our Data Analyst marker layer group
+                }).bindTooltip(`${tooltip_location}` + "<br>" + `${tooltip_number}`)
+                .openTooltip().addTo(businessLayer);
             });
         });
+    });
 });
 
 var lightmap = L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}", {
@@ -110,8 +178,8 @@ var baseMaps = {
 };
 
 var overlayMaps = {
-    "Business Analyst" : businessLayer,
-    "Data Analyst" : analystLayer
+    "Business Analyst": businessLayer,
+    "Data Analyst": analystLayer
 }
 
 var myMap = L.map("mapid", {
@@ -122,4 +190,19 @@ var myMap = L.map("mapid", {
 
 L.control.layers(baseMaps, overlayMaps, {
     collapsed: false
-  }).addTo(myMap);
+}).addTo(myMap);
+
+var legend = L.control({ position: 'bottomright' });
+
+legend.onAdd = function (map) {
+
+    var div = L.DomUtil.create('div', 'info legend'),
+    titles = ["Bussiness Analyst", "Data Analyst"];
+    div.innerHTML += ('<strong>  Job Title  </strong><br>');
+    div.innerHTML += ('<i style="background:' + 'lightcoral' + '"></i> ' + 'Business Analyst' + '<br>');
+    div.innerHTML += ('<i style="background:' + 'lightgreen' + '"></i> ' + 'Data Analyst' + '<br>');
+
+    return div;
+};
+
+legend.addTo(myMap);
