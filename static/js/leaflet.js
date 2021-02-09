@@ -1,17 +1,28 @@
-const API_KEY = "AIzaSyBYbCDB_gjy4zEU8tCwlyRWbLAGd_7ii-0";
 // Route to data analyst data
 var analyst_data = "/data-analyst";
 // Route to busines analyst data
 var business_data = "/business-analyst";
 
 
+
+function findRadius(number) {
+    if (number > 10) {
+        return number = 10
+    }
+    else if (number > 5) {
+        return number
+    }
+    else 
+    return number * 2
+}
+
 // Create layer group
 analystLayer = new L.LayerGroup()
-data_city_counts = {}
 // Grab Data Analyst data
 d3.json(analyst_data).then(function (data) {
     analyst_locations = []
     city_coordinates = {}
+    data_city_counts = {}
     // Grab all of the locations from the data set and save to array
     data.result.forEach(function (d) {
         analyst_locations.push(d.location);
@@ -60,15 +71,15 @@ d3.json(analyst_data).then(function (data) {
                 // Grab the name of the location tied to the coordinates and save to variable to display in our tooltip
                 tooltip_location = Object.keys(city_coordinates).find(key => city_coordinates[key] === d);
                 // Grab the number of times each location shows up in our original data (AKA number of job listings for each city), save for tooltip display
-                tooltip_number = Object.values(data_city_counts).find(value => data_city_counts[value] === tooltip_location);
+                tooltip_number = data_city_counts[tooltip_location];
                 return new L.CircleMarker(d, {
-                    radius: 10,
+                    radius: findRadius(tooltip_number),
                     color: 'black',
                     fillColor: 'lightgreen',
                     stroke: false,
                     fillOpacity: 0.5
                     // Bind and open our tooltip, add marker to our Data Analyst marker layer group
-                }).bindTooltip(`${tooltip_location}` + "<br>" + `${tooltip_number}`)
+                }).bindTooltip(`${tooltip_location}` + "<br>" + "<h3> # of Jobs:" + `${tooltip_number}` + "</h3>")
                 .openTooltip().addTo(analystLayer);
             });
         });
@@ -130,15 +141,15 @@ d3.json(business_data).then(function (data) {
                 // Grab the name of the location tied to the coordinates and save to variable to display in our tooltip
                 tooltip_location = Object.keys(city_coordinates).find(key => city_coordinates[key] === d);
                 // Grab the number of times each location shows up in our original data (AKA number of job listings for each city), save for tooltip display
-                tooltip_number = Object.values(business_city_counts).find(value => business_city_counts[value] === tooltip_location);
+                tooltip_number = business_city_counts[tooltip_location];
                 return new L.CircleMarker(d, {
-                    radius: 10,
+                    radius: findRadius(tooltip_number),
                     color: 'black',
                     fillColor: 'lightcoral',
                     stroke: false,
                     fillOpacity: 0.5
                 // Bind and open our tooltip, add marker to our Data Analyst marker layer group
-                }).bindTooltip(`${tooltip_location}` + "<br>" + `${tooltip_number}`)
+                }).bindTooltip(`${tooltip_location}` + "<br>" + "<h3> # of Jobs:" + `${tooltip_number}` + "</h3>")
                 .openTooltip().addTo(businessLayer);
             });
         });
