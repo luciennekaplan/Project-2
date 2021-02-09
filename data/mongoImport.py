@@ -2,6 +2,9 @@ import pymongo
 import os
 import csv
 import glob
+from config import API_KEY
+import requests
+import json
 
 # Get a list of all CSVs
 csvpaths = glob.glob(os.path.join(os.path.dirname(__file__),"*.csv"))
@@ -53,4 +56,36 @@ for files in csvpaths:
     # Check rows imported matches CSV length
     print(f"Rows imported: {collection.count()}")
 # Check the collections created
+print(f"Created the following collections:\n {db.list_collection_names()}")
+
+# Now, get the lat/longs we'll need
+collections = db.list_collection_names()
+for table in collections:
+    data = db.get_collection(table).find()
+    locationCollection = db.create_collection(f"{table}Locations")
+    
+    uniques = data.distinct("location")
+    #uniques = ["Artesia, CA"]
+    for address in uniques:
+        a = address.replace(" ","")
+        params = {"address": a, "key": API_KEY}
+
+        #Build URL using the Google Maps API
+        base_url = "https://maps.googleapis.com/maps/api/geocode/json"
+
+        try:
+            # Run request
+            response = requests.get(base_url, params=params).json()
+
+            # Extract lat/lng
+            lat = response["results"][0]["geometry"]["location"]["lat"]
+            lng = response["results"][0]["geometry"]["location"]["lng"]
+
+            locationCollection.insert_one({
+                address: [lat, lng]
+            })
+        except:
+            print(f"Coordinates of {address} not found")
+    print(f"Rows imported: {locationCollection.count()}")
+
 print(f"Created the following collections:\n {db.list_collection_names()}")
