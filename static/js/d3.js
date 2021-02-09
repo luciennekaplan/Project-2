@@ -730,5 +730,3 @@ function groupedBar(link) {
 };
 // then we call our grouped bar chart function so it loads on page load
 groupedBar(url);
-
-// chartGroup.selectAll("rect").on("click", d => buildSalaryChart(url, d))

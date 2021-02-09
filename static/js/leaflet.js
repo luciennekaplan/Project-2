@@ -1,208 +1,152 @@
-const API_KEY = "AIzaSyBYbCDB_gjy4zEU8tCwlyRWbLAGd_7ii-0";
-// Route to data analyst data
-var analyst_data = "/data-analyst";
-// Route to busines analyst data
-var business_data = "/business-analyst";
+var cityArrayData = []
+var cityArrayBus = []
+d3.json("/data-analyst/locations").then(dataLoc => {
+    console.log(dataLoc)
+    d3.json("/data-analyst").then(data => {
+        console.log(data)
+        var citiesData = {};
 
-
-// Create layer group
-analystLayer = new L.LayerGroup()
-data_city_counts = {}
-// Grab Data Analyst data
-d3.json(analyst_data).then(function (data) {
-    analyst_locations = []
-    city_coordinates = {}
-    // Grab all of the locations from the data set and save to array
-    data.result.forEach(function (d) {
-        analyst_locations.push(d.location);
-    });
-    // Create function to count occurrence of a city in an array 
-    function countCity(city) {
-        if (city in data_city_counts) {
-            data_city_counts[city] += 1;
-        }
-        else {
-            data_city_counts[city] = 1;
-        }
-    }
-    // Function that will take our function from above and loop through our original data
-    function countCities(array) {
-        array.forEach(countCity);
-        return data_city_counts;
-    }
-    countCities(analyst_locations);
-    // Function to count unique values in array
-    const unique = (value, index, self) => {
-        return self.indexOf(value) === index
-    }
-    // Find our unique cities and save to array
-    const unique_analyst_locations = analyst_locations.filter(unique)
-    // Loop through our list of unique locations 
-    unique_analyst_locations.forEach(function (d) {
-        // Take location and format it for API call
-        var address = d;
-        var url_address = address.split(" ").join("");
-        url_address = address.replace(",", "");
-        // API call to find geocoordinates of each city
-        var coordinate_url = `https://maps.googleapis.com/maps/api/geocode/json?address=${url_address}&key=${API_KEY}`;
-        // Save city and coordinates to object 
-        d3.json(coordinate_url).then(function (d) {
-            try {
-                city_coordinates[address] = ([d.results[0].geometry.location.lat, d.results[0].geometry.location.lng]);
+        // then we loop through the data that we got from the promise and do a frequency count for each industry
+        data.result.forEach((d, i) => {
+            if (d.location in citiesData) {
+                //this is basically saying "if the industry is already in our keys, add 1 to the value"
+                citiesData[d.location] += 1;
             }
-            catch (TypeError) {
-                console.log("City not found, skipping");
+            else {
+                // and this one is saying "if this industry isn't already in our keys then make it a key and give it the value of 1"
+                citiesData[d.location] = 1;
             }
-            //Grab just the coordinate values from our object of locations/coordinates 
-            just_coordinates = Object.values(city_coordinates);
-            // Turn each set of coordinates into a circle marker!
-            just_coordinates.forEach(function (d) {
-                // Grab the name of the location tied to the coordinates and save to variable to display in our tooltip
-                tooltip_location = Object.keys(city_coordinates).find(key => city_coordinates[key] === d);
-                // Grab the number of times each location shows up in our original data (AKA number of job listings for each city), save for tooltip display
-                tooltip_number = Object.values(data_city_counts).find(value => data_city_counts[value] === tooltip_location);
-                return new L.CircleMarker(d, {
-                    radius: 10,
-                    color: 'black',
-                    fillColor: 'lightgreen',
-                    stroke: false,
-                    fillOpacity: 0.5
-                    // Bind and open our tooltip, add marker to our Data Analyst marker layer group
-                }).bindTooltip(`${tooltip_location}` + "<br>" + `${tooltip_number}`)
-                .openTooltip().addTo(analystLayer);
-            });
         });
-    });
-});
 
-//Create layer group
-businessLayer = new L.LayerGroup()
-business_city_counts = {}
-// Grab Business Analyst data
-d3.json(business_data).then(function (data) {
-    business_locations = []
-    city_coordinates = {}
-    // Grab all of the locations from the data set and save to array
-    data.result.forEach(function (d) {
-        business_locations.push(d.location);
-    });
-    // Create function to count occurrence of a city in an array 
-    function countCity(city) {
-        if (city in business_city_counts) {
-            business_city_counts[city] += 1;
-        }
-        else {
-            business_city_counts[city] = 1;
-        }
-    }
-    // Function that will take our function from above and loop through our original data
-    function countCities(array) {
-        array.forEach(countCity);
-        return business_city_counts;
-    }
-    countCities(business_locations);
-    // Function to count unique values in array
-    const unique = (value, index, self) => {
-        return self.indexOf(value) === index
-    }
-    // Find our unique cities and save to array
-    const unique_business_locations = business_locations.filter(unique)
-    // Loop through our list of unique locations 
-    unique_business_locations.forEach(function (d) {
-        // Take location and format it for API call
-        var address = d;
-        var url_address = address.split(" ").join("");
-        url_address = address.replace(",", "");
-        // API call to find geocoordinates of each city
-        var coordinate_url = `https://maps.googleapis.com/maps/api/geocode/json?address=${url_address}&key=${API_KEY}`;
-        // Save city and coordinates to object 
-        d3.json(coordinate_url).then(function (d) {
-            try {
-                city_coordinates[d.results[0].formatted_address] = ([d.results[0].geometry.location.lat, d.results[0].geometry.location.lng]);
+        var citNameData = Object.keys(citiesData)
+        var citCountData = Object.values(citiesData)
+
+        
+
+        citNameData.forEach((d, i) => {
+            var dicty = {
+                name : d,
+                count: citCountData[i],
+                coordinates: dataLoc[d]
             }
-            catch (TypeError) {
-                console.log("City not found, skipping");
+
+            cityArrayData.push(dicty)
+        })
+        console.log(cityArrayData)
+    })
+})
+
+d3.json("/business-analyst/locations").then(busLoc => {
+    console.log(busLoc)
+    d3.json("/business-analyst").then(data => {
+        console.log(data)
+        var citiesBus = {};
+
+        // then we loop through the data that we got from the promise and do a frequency count for each industry
+        data.result.forEach((d, i) => {
+            if (d.location in citiesBus) {
+                //this is basically saying "if the industry is already in our keys, add 1 to the value"
+                citiesBus[d.location] += 1;
             }
-            //Grab just the coordinate values from our object of locations/coordinates
-            just_coordinates = Object.values(city_coordinates);
-            // Turn each set of coordinates into a circle marker!
-            just_coordinates.forEach(function (d) {
-                // Grab the name of the location tied to the coordinates and save to variable to display in our tooltip
-                tooltip_location = Object.keys(city_coordinates).find(key => city_coordinates[key] === d);
-                // Grab the number of times each location shows up in our original data (AKA number of job listings for each city), save for tooltip display
-                tooltip_number = Object.values(business_city_counts).find(value => business_city_counts[value] === tooltip_location);
-                return new L.CircleMarker(d, {
-                    radius: 10,
-                    color: 'black',
-                    fillColor: 'lightcoral',
-                    stroke: false,
-                    fillOpacity: 0.5
-                // Bind and open our tooltip, add marker to our Data Analyst marker layer group
-                }).bindTooltip(`${tooltip_location}` + "<br>" + `${tooltip_number}`)
-                .openTooltip().addTo(businessLayer);
-            });
+            else {
+                // and this one is saying "if this industry isn't already in our keys then make it a key and give it the value of 1"
+                citiesBus[d.location] = 1;
+            }
         });
-    });
+
+        var citNameBus = Object.keys(citiesBus)
+        var citCountBus = Object.values(citiesBus)
+
+        citNameBus.forEach((d, i) => {
+            var dicty = {
+                name : d,
+                count: citCountBus[i],
+                coordinates: busLoc[d]
+            }
+
+            cityArrayBus.push(dicty)
+        })
+        console.log(cityArrayBus)
+    })
+})
+setTimeout(function () { 
+console.log(cityArrayBus)
+console.log(cityArrayData)
+
+var dataAnalystMarkers = []
+var busAnalystMarkers = []
+
+cityArrayData.forEach(d => {
+    dataAnalystMarkers.push(
+        L.circle(d.coordinates, {
+            stroke: true,
+            weight: 2,
+            fillOpacity: 0.75,
+            color: "black",
+            fillColor: "blue",
+            radius: d.count * 100,
+            interactive: true
+        }).on("click", function (event){
+            console.log(d)
+        }).bindTooltip(`${d.name} <br> # of jobs: ${d.count}`)
+    )
+})
+
+cityArrayBus.forEach(d => {
+    busAnalystMarkers.push(
+        L.circle(d.coordinates, {
+            stroke: true,
+            weight: 2,
+            fillOpacity: 0.75,
+            color: "black",
+            fillColor: "green",
+            radius: d.count * 100,
+            interactive: true
+        }).on("click", function (event){
+            console.log(d)
+        }).bindTooltip(`${d.name} <br> # of jobs: ${d.count}`)
+    )
+})
+
+var dataAnalyst = L.layerGroup(dataAnalystMarkers);
+var busAnalyst = L.layerGroup(busAnalystMarkers);
+
+var streetmap = L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}", {
+  attribution: "© <a href='https://www.mapbox.com/about/maps/'>Mapbox</a> © <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> <strong><a href='https://www.mapbox.com/map-feedback/' target='_blank'>Improve this map</a></strong>",
+  tileSize: 512,
+  maxZoom: 18,
+  zoomOffset: -1,
+  id: "mapbox/streets-v11",
+  accessToken: MAP_API_KEY
 });
 
-var lightmap = L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}", {
-    attribution: "© <a href='https://www.mapbox.com/about/maps/'>Mapbox</a> © <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> <strong><a href='https://www.mapbox.com/map-feedback/' target='_blank'>Improve this map</a></strong>",
-    tileSize: 512,
-    maxZoom: 18,
-    zoomOffset: -1,
-    id: "mapbox/light-v10",
-    accessToken: "pk.eyJ1IjoibHVjaWVubmVrYXBsYW4iLCJhIjoiY2trOHowdGN3MHNyODJ5bnRmbmg5b2t0dyJ9.46ciJtDd5-UKUy6rTirCgA",
-});
-
-var darkmap = L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}", {
-    attribution: "© <a href='https://www.mapbox.com/about/maps/'>Mapbox</a> © <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> <strong><a href='https://www.mapbox.com/map-feedback/' target='_blank'>Improve this map</a></strong>",
-    tileSize: 512,
-    maxZoom: 18,
-    zoomOffset: -1,
-    id: "mapbox/dark-v10",
-    accessToken: "pk.eyJ1IjoibHVjaWVubmVrYXBsYW4iLCJhIjoiY2trOHowdGN3MHNyODJ5bnRmbmg5b2t0dyJ9.46ciJtDd5-UKUy6rTirCgA",
-});
-var outdoorsmap = L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}", {
-    attribution: "© <a href='https://www.mapbox.com/about/maps/'>Mapbox</a> © <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> <strong><a href='https://www.mapbox.com/map-feedback/' target='_blank'>Improve this map</a></strong>",
-    tileSize: 512,
-    maxZoom: 18,
-    zoomOffset: -1,
-    id: "mapbox/outdoors-v11",
-    accessToken: "pk.eyJ1IjoibHVjaWVubmVrYXBsYW4iLCJhIjoiY2trOHowdGN3MHNyODJ5bnRmbmg5b2t0dyJ9.46ciJtDd5-UKUy6rTirCgA",
+var darkmap = L.tileLayer("https://api.mapbox.com/styles/v1/mapbox/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}", {
+  attribution: "Map data &copy; <a href=\"https://www.openstreetmap.org/\">OpenStreetMap</a> contributors, <a href=\"https://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"https://www.mapbox.com/\">Mapbox</a>",
+  maxZoom: 18,
+  id: "dark-v10",
+  accessToken: MAP_API_KEY
 });
 
 var baseMaps = {
-    "Dark Map": darkmap,
-    "Light Map": lightmap,
-    "Outdoor Map": outdoorsmap
-};
-
+    "Street Map": streetmap,
+    "Dark Map": darkmap
+  };
+  
+  // Create an overlay object
 var overlayMaps = {
-    "Business Analyst": businessLayer,
-    "Data Analyst": analystLayer
-}
+    "Data Analyst": dataAnalyst,
+    "Business Analyst": busAnalyst
+  };
 
-var myMap = L.map("mapid", {
-    center: [39.50, -98.35],
-    zoom: 4,
-    layers: [darkmap, analystLayer]
-});
-
-L.control.layers(baseMaps, overlayMaps, {
+  var myMap = L.map("mapid", {
+    center: [37.09, -95.71],
+    zoom: 5,
+    layers: [streetmap, dataAnalyst]
+  });
+  
+  // Pass our map layers into our layer control
+  // Add the layer control to the map
+  L.control.layers(baseMaps, overlayMaps, {
     collapsed: false
-}).addTo(myMap);
-
-var legend = L.control({ position: 'bottomright' });
-
-legend.onAdd = function (map) {
-
-    var div = L.DomUtil.create('div', 'info legend'),
-    titles = ["Bussiness Analyst", "Data Analyst"];
-    div.innerHTML += ('<strong>  Job Title  </strong><br>');
-    div.innerHTML += ('<i style="background:' + 'lightcoral' + '"></i> ' + 'Business Analyst' + '<br>');
-    div.innerHTML += ('<i style="background:' + 'lightgreen' + '"></i> ' + 'Data Analyst' + '<br>');
-
-    return div;
-};
-
-legend.addTo(myMap);
+  }).addTo(myMap);
+}, 2000)
