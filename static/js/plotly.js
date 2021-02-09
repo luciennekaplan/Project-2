@@ -1,9 +1,12 @@
 
 
-function buildSalaryChart(url, indus) {
+function buildSalaryChart(url, indus, city) {
     d3.json(url).then(function (theData) {
         console.log(theData);
         data = [];
+        if(city !== undefined){
+            theData = city
+        }
         if (indus !== undefined) {
             console.log(indus)
             

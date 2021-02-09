@@ -87,7 +87,8 @@ cityArrayData.forEach(d => {
             radius: d.count * 100,
             interactive: true
         }).on("click", function (event){
-            console.log(d)
+            svg.remove()
+            groupedBar(url, d.name)
         }).bindTooltip(`${d.name} <br> # of jobs: ${d.count}`)
     )
 })
@@ -103,7 +104,8 @@ cityArrayBus.forEach(d => {
             radius: d.count * 100,
             interactive: true
         }).on("click", function (event){
-            console.log(d)
+            svg.remove()
+            groupedBar(url, d.name)
         }).bindTooltip(`${d.name} <br> # of jobs: ${d.count}`)
     )
 })

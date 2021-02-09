@@ -327,11 +327,19 @@ function updateDash(link) {
 
 
 // then we have our function to build a grouped bar chart
-function groupedBar(link) {
+function groupedBar(link, city) {
     d3.json(link).then(data => {
         // first things first we call the data then log it so we know what we're dealing with
         console.log(data);
-
+        if (city !== undefined) {
+            var filtDa = data.CleanDataAnalyst.filter(function (d) {return d.location.includes(city)})
+            var filtBa = data.CleanBusinessAnalyst.filter(function (d) {return d.location.includes(city)})
+            data = {
+                CleanDataAnalyst: filtDa,
+                CleanBusinessAnalyst: filtBa
+            }
+            buildSalaryChart(url, undefined, data)
+        }
         // then we set up our svg area
         svg = d3.select("#industrybar")
             .append("svg")
@@ -435,21 +443,37 @@ function groupedBar(link) {
         console.log(sortedDictsCombined);
 
         // and we get our slices for later
+        if (sortedDictsCombined.length > 10) {
         var combinedTopTen = sortedDictsCombined.slice(0, 10);
+        }
+        if (sortedDictsCombined.length > 10) {
         var comTenTwenty = sortedDictsCombined.slice(10, 20);
+        }
+        if (sortedDictsCombined.length > 30) {
         var comTwentyThirty = sortedDictsCombined.slice(20, 30);
+        }
+        if (sortedDictsCombined.length > 40) {
         var comThirtyForty = sortedDictsCombined.slice(30, 40);
+        }
+        if (sortedDictsCombined.length > 50) {
         var comFortyFifty = sortedDictsCombined.slice(40, 50);
-
+        }
         // now we set up our chart
         // a grouped bar chart in d3 requires 2 different x scales, one for the overall groups, and one for the subgroups
+        if (sortedDictsCombined.length > 10) {
         var xScaleAll = d3.scaleBand()
             .domain(combinedTopTen.map(d => d.name))
             .range([0, width])
             .padding(0.1);
-
+        }
+        else {
+            var xScaleAll = d3.scaleBand()
+            .domain(sortedDictsCombined.map(d => d.name))
+            .range([0, width])
+            .padding(0.1);
+        }
         // here we grab the names of our sub groups
-        var subs = Object.keys(combinedTopTen[0].count);
+        var subs = Object.keys(sortedDictsCombined[0].count);
 
         // and we set up our subscale
         var xScaleSub = d3.scaleBand()
@@ -463,12 +487,20 @@ function groupedBar(link) {
             .range(["rgba(100, 200, 102, 0.7)", "rgba(255, 100, 102, 0.7)"]);
 
         // and we set up our y scale here
-        var yScale = d3.scaleLinear()
-            // something different here, because we have more than one value we can't just go off one key, because the other value might be larger at some point
-            // so we have to grab the max of the max for each array that we make from the nested object
-            .domain([0, d3.max(combinedTopTen, function (d) { return d3.max(Object.values(d.count), function (e) { return e }) })])
-            .range([height, 0]);
-
+        if (sortedDictsCombined.length > 10) {
+            var yScale = d3.scaleLinear()
+                // something different here, because we have more than one value we can't just go off one key, because the other value might be larger at some point
+                // so we have to grab the max of the max for each array that we make from the nested object
+                .domain([0, d3.max(combinedTopTen, function (d) { return d3.max(Object.values(d.count), function (e) { return e }) })])
+                .range([height, 0]);
+        }
+        else{
+            var yScale = d3.scaleLinear()
+                // something different here, because we have more than one value we can't just go off one key, because the other value might be larger at some point
+                // so we have to grab the max of the max for each array that we make from the nested object
+                .domain([0, d3.max(sortedDictsCombined, function (d) { return d3.max(Object.values(d.count), function (e) { return e }) })])
+                .range([height, 0]);
+        }
 
         // then we assign them their own variables
         var bottomAxis = d3.axisBottom(xScaleAll);
@@ -516,9 +548,35 @@ function groupedBar(link) {
 
 
         // here is where we make our bars appear
-        chartGroup.append("g")
+        if(sortedDictsCombined.length > 10) {
+            chartGroup.append("g")
+                .selectAll("g")
+                .data(combinedTopTen)
+                .enter()
+                .append("g")
+                .attr("transform", function (d) { return "translate(" + xScaleAll(d.name) + ",0)"; })
+                .selectAll("rect")
+                .data(function (d) { return subs.map(function (key) { return { name: d.name, key: key, value: d["count"][key] }; }); })// here we assign the different job titles data to each bar
+                .enter().append("rect")
+                .classed("indusbar", true)
+                .attr("x", function (d) { return xScaleSub(d.key); })
+                .attr("y", function (d) { return yScale(d.value); })
+                .attr("width", xScaleSub.bandwidth())
+                .attr("height", function (d) { return height - yScale(d.value); })
+                .attr("fill", function (d) { return colors(d.key); })
+                .on("mouseover.t", toolTip.show)
+                .on("mouseover.c", function (d) {
+                    d3.select(this).style("fill", d3.rgb(colors(d.key)).darker(2))
+                })
+                .on("mouseout.t", toolTip.hide)
+                .on("mouseout.c", function (d) {
+                    d3.select(this).style("fill", colors(d.key));
+                });
+        }
+        else {
+            chartGroup.append("g")
             .selectAll("g")
-            .data(combinedTopTen)
+            .data(sortedDictsCombined)
             .enter()
             .append("g")
             .attr("transform", function (d) { return "translate(" + xScaleAll(d.name) + ",0)"; })
@@ -539,7 +597,7 @@ function groupedBar(link) {
             .on("mouseout.c", function (d) {
                 d3.select(this).style("fill", colors(d.key));
             });
-
+        }
         // then we have out legend to show which color is which
         var legend = chartGroup.selectAll(".legend")
             .data(subs)
@@ -562,42 +620,6 @@ function groupedBar(link) {
             .style("text-anchor", "end")
             .text(function (d) { return d; });
 
-
-        // then we have our page numbers
-        var comTenAxis = chartGroup.append("text")
-            .attr("transform", `translate(${(width / 2) - 30}, ${height + margin.top})`)
-            .attr("text-anchor", "middle")
-            .attr("font-size", "16px")
-            .classed("active x", true)
-            .text("1");
-
-        var comTenTwentyAxis = chartGroup.append("text")
-            .attr("transform", `translate(${(width / 2) - 20}, ${height + margin.top})`)
-            .attr("text-anchor", "middle")
-            .attr("font-size", "16px")
-            .classed("inactive", true)
-            .text("2");
-
-        var comTwentyThirtyAxis = chartGroup.append("text")
-            .attr("transform", `translate(${(width / 2) - 10}, ${height + margin.top})`)
-            .attr("text-anchor", "middle")
-            .attr("font-size", "16px")
-            .classed("inactive", true)
-            .text("3");
-
-        var comThirtyFortyAxis = chartGroup.append("text")
-            .attr("transform", `translate(${(width / 2)}, ${height + margin.top})`)
-            .attr("text-anchor", "middle")
-            .attr("font-size", "16px")
-            .classed("inactive", true)
-            .text("4");
-
-        var comFortyFiftyAxis = chartGroup.append("text")
-            .attr("transform", `translate(${(width / 2) + 10}, ${height + margin.top})`)
-            .attr("text-anchor", "middle")
-            .attr("font-size", "16px")
-            .classed("inactive", true)
-            .text("5");
 
         // and our update function for the listeners
         function groupedUpdate(newData) {
@@ -669,64 +691,108 @@ function groupedBar(link) {
                 });
 
 
-            chartGroup.selectAll("rect").on("click", d => buildSalaryChart(url, d.name))
+            chartGroup.selectAll("rect").on("click", d => buildSalaryChart(url, d.name, data))
             setTimeout(function () { truncateText() }, 500);
 
         };
 
-        // and then all our listeners
-        comTenAxis.on("click", function (d) {
-            d3.select(".active")
-                .classed("active x", false)
+        // then we have our page numbers and our listeners
+
+        if(sortedDictsCombined.length > 10) {
+            var comTenAxis = chartGroup.append("text")
+                .attr("transform", `translate(${(width / 2) - 30}, ${height + margin.top})`)
+                .attr("text-anchor", "middle")
+                .attr("font-size", "16px")
+                .classed("active x", true)
+                .text("1");
+
+            comTenAxis.on("click", function (d) {
+                d3.select(".active")
+                    .classed("active x", false)
+                    .classed("inactive", true)
+                comTenAxis.classed("inactive", false)
+                    .classed("active x", true);
+
+                groupedUpdate(combinedTopTen);
+            });
+        }
+
+        if(sortedDictsCombined.length > 10) {
+            var comTenTwentyAxis = chartGroup.append("text")
+                .attr("transform", `translate(${(width / 2) - 20}, ${height + margin.top})`)
+                .attr("text-anchor", "middle")
+                .attr("font-size", "16px")
                 .classed("inactive", true)
-            comTenAxis.classed("inactive", false)
-                .classed("active x", true);
+                .text("2");
 
-            groupedUpdate(combinedTopTen);
-        });
+            comTenTwentyAxis.on("click", function (d) {
+                d3.select(".active")
+                    .classed("active x", false)
+                    .classed("inactive", true)
+                comTenTwentyAxis.classed("inactive", false)
+                    .classed("active x", true);
 
-        comTenTwentyAxis.on("click", function (d) {
-            d3.select(".active")
-                .classed("active x", false)
+                groupedUpdate(comTenTwenty);
+            });
+        }
+        if(sortedDictsCombined.length > 30) {
+            var comTwentyThirtyAxis = chartGroup.append("text")
+                .attr("transform", `translate(${(width / 2) - 10}, ${height + margin.top})`)
+                .attr("text-anchor", "middle")
+                .attr("font-size", "16px")
                 .classed("inactive", true)
-            comTenTwentyAxis.classed("inactive", false)
-                .classed("active x", true);
+                .text("3");
 
-            groupedUpdate(comTenTwenty);
-        });
+            comTwentyThirtyAxis.on("click", function (d) {
+                d3.select(".active")
+                    .classed("active x", false)
+                    .classed("inactive", true)
+                comTwentyThirtyAxis.classed("inactive", false)
+                    .classed("active x", true);
 
-        comTwentyThirtyAxis.on("click", function (d) {
-            d3.select(".active")
-                .classed("active x", false)
+                groupedUpdate(comTwentyThirty);
+            });
+        }
+        if(sortedDictsCombined.length > 40) {
+            var comThirtyFortyAxis = chartGroup.append("text")
+                .attr("transform", `translate(${(width / 2)}, ${height + margin.top})`)
+                .attr("text-anchor", "middle")
+                .attr("font-size", "16px")
                 .classed("inactive", true)
-            comTwentyThirtyAxis.classed("inactive", false)
-                .classed("active x", true);
+                .text("4");
 
-            groupedUpdate(comTwentyThirty);
-        });
+            comThirtyFortyAxis.on("click", function (d) {
+                d3.select(".active")
+                    .classed("active x", false)
+                    .classed("inactive", true)
+                comThirtyFortyAxis.classed("inactive", false)
+                    .classed("active x", true);
 
-        comThirtyFortyAxis.on("click", function (d) {
-            d3.select(".active")
-                .classed("active x", false)
+                groupedUpdate(comThirtyForty);
+            });
+        }
+        if(sortedDictsCombined.length > 50) {
+            var comFortyFiftyAxis = chartGroup.append("text")
+                .attr("transform", `translate(${(width / 2) + 10}, ${height + margin.top})`)
+                .attr("text-anchor", "middle")
+                .attr("font-size", "16px")
                 .classed("inactive", true)
-            comThirtyFortyAxis.classed("inactive", false)
-                .classed("active x", true);
+                .text("5");
+            
+            comFortyFiftyAxis.on("click", function (d) {
+                d3.select(".active")
+                    .classed("active x", false)
+                    .classed("inactive", true)
+                comFortyFiftyAxis.classed("inactive", false)
+                    .classed("active x", true);
 
-            groupedUpdate(comThirtyForty);
-        });
-
-        comFortyFiftyAxis.on("click", function (d) {
-            d3.select(".active")
-                .classed("active x", false)
-                .classed("inactive", true)
-            comFortyFiftyAxis.classed("inactive", false)
-                .classed("active x", true);
-
-            groupedUpdate(comFortyFifty);
-        });
-
-        chartGroup.selectAll("rect").on("click", d => buildSalaryChart(url, d.name))
+                groupedUpdate(comFortyFifty);
+            });
+        }
+        chartGroup.selectAll("rect").on("click", d => buildSalaryChart(url, d.name, data))
     });
 };
 // then we call our grouped bar chart function so it loads on page load
 groupedBar(url);
+
+
