@@ -1,9 +1,40 @@
 
 
-function buildSalaryChart(url) {
+function buildSalaryChart(url, indus) {
     d3.json(url).then(function (theData) {
         console.log(theData);
         data = [];
+        if (indus !== undefined) {
+            console.log(indus)
+            
+            if (url === "/all") {
+                var filteredba = theData.CleanBusinessAnalyst.filter(function (d) {return d.industry.includes(indus)})
+                var filteredda = theData.CleanDataAnalyst.filter(function (d) {return d.industry.includes(indus)})
+
+                theData = {
+                    CleanBusinessAnalyst: filteredba,
+                    CleanDataAnalyst: filteredda
+                }
+            }
+            else if (url === "/business-analyst") {
+                var filteredba = theData.result.filter(function (d) {return d.industry.includes(indus)})
+                theData = {result: filteredba}
+            }
+            else if (url === "/data-analyst") {
+                var filteredda = theData.result.filter(function (d) {return d.industry.includes(indus)})
+                theData = {result: filteredda}
+            }
+            function shortenTitle(text) {
+                if (text.length > 20)
+                        return text.substring(0, 20) + '...';
+                    else
+                        return text;
+            }
+            var industitle = shortenTitle(indus)
+        }                
+        else {
+            var industitle = ""
+        }
         for (const [key, value] of Object.entries(theData)) {
             var salary = value.map(d => (parseInt(d.salaryHigh) +
                 parseInt(d.salaryLow)) / 2);
@@ -26,7 +57,7 @@ function buildSalaryChart(url) {
         var layout = {
             bargap: 0.05,
             bargroupgap: 0.2,
-            title: "Common Salaries",
+            title: `${industitle} Common Salaries`,
             xaxis: { title: "Salary" },
             yaxis: { title: "Count" },
             legend: {

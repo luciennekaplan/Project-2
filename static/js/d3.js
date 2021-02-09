@@ -16,7 +16,7 @@ var height = svgHeight - margin.top - margin.bottom;
 
 // here we initialize the svg variable so we can use it inside functions
 var svg;
-
+var chartGroup;
 // we have this to use as our initial data route to build the industry bar chart
 var url = "/all";
 
@@ -36,7 +36,7 @@ function updateDash(link) {
             .attr("width", svgWidth);
 
         // This is where we add the group element to the svg, this is where our chart is going to go
-        var chartGroup = svg.append("g")
+        chartGroup = svg.append("g")
             .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
         // here we initialize a dictionary for the industry count
@@ -149,7 +149,7 @@ function updateDash(link) {
             });
         svg.call(toolTip);
 
-        var type = labelChart("result",url);
+        var type = labelChart("result", url);
 
         // then we add the bars to the bar chart with the data we need
         chartGroup.selectAll(".indusbar")
@@ -162,8 +162,14 @@ function updateDash(link) {
             .attr("width", xScale.bandwidth())
             .attr("height", d => height - yScale(d.count))
             .attr("fill", pickColor(type)["fill"])
-            .on("mouseover", toolTip.show)
-            .on("mouseout", toolTip.hide);
+            .on("mouseover.t", toolTip.show)
+            .on("mouseover.c", function (d) {
+                d3.select(this).style("fill", d3.rgb(pickColor(type)["fill"]).darker(2))
+            })
+            .on("mouseout.t", toolTip.hide)
+            .on("mouseout.c", function (d) {
+                d3.select(this).style("fill", pickColor(type)["fill"]);
+            });
 
         // and here we add the different axes labels for the different pages of data    
         var topTenAxis = chartGroup.append("text")
@@ -246,9 +252,16 @@ function updateDash(link) {
                 .attr("width", xScale.bandwidth())
                 .attr("height", d => height - yScale(d.count))
                 .attr("fill", pickColor(type)["fill"])
-                .on("mouseover", toolTip.show)
-                .on("mouseout", toolTip.hide);
+                .on("mouseover.t", toolTip.show)
+                .on("mouseover.c", function (d) {
+                    d3.select(this).style("fill", d3.rgb(pickColor(type)["fill"]).darker(2))
+                })
+                .on("mouseout.t", toolTip.hide)
+                .on("mouseout.c", function (d) {
+                    d3.select(this).style("fill", pickColor(type)["fill"]);
+                });
 
+            chartGroup.selectAll("rect").on("click", d => buildSalaryChart(url, d.name))
             setTimeout(function () { truncateText() }, 500);
         };
 
@@ -258,10 +271,10 @@ function updateDash(link) {
             d3.select(".active")
                 .classed("active x", false)
                 .classed("inactive", true);
-            
+
             topTenAxis.classed("inactive", false)
                 .classed("active x", true);
-            
+
             listenerUpdate(topTen);
         });
 
@@ -306,6 +319,8 @@ function updateDash(link) {
 
             listenerUpdate(fortyToFifty);
         });
+
+        chartGroup.selectAll("rect").on("click", d => buildSalaryChart(url, d.name))
     });
 };
 
@@ -324,7 +339,7 @@ function groupedBar(link) {
             .attr("width", svgWidth);
 
         // This is where we add the group element to the svg, this is where our chart is going to go
-        var chartGroup = svg.append("g")
+        chartGroup = svg.append("g")
             .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
         // now we need to get a frequency count of the industries in each dataset
@@ -403,13 +418,13 @@ function groupedBar(link) {
                     count: {
                         "Data Analyst": daCount[i],
                         "Business Analyst": 0
-                        }
+                    }
                 }
                 // and push it to the array of objects
                 combinedListDict.push(dicty);
             }
         });
-        
+
         // then we log it to make sure it matches up with the frequency count we did before
         console.log(combinedListDict);
 
@@ -435,7 +450,7 @@ function groupedBar(link) {
 
         // here we grab the names of our sub groups
         var subs = Object.keys(combinedTopTen[0].count);
-        
+
         // and we set up our subscale
         var xScaleSub = d3.scaleBand()
             .domain(subs)
@@ -445,13 +460,13 @@ function groupedBar(link) {
         // and we set up which colors they'll be, otherwise both bars will be black
         var colors = d3.scaleOrdinal()
             .domain(subs)
-            .range([ "rgba(100, 200, 102, 0.7)","rgba(255, 100, 102, 0.7)"]);
+            .range(["rgba(100, 200, 102, 0.7)", "rgba(255, 100, 102, 0.7)"]);
 
         // and we set up our y scale here
         var yScale = d3.scaleLinear()
             // something different here, because we have more than one value we can't just go off one key, because the other value might be larger at some point
             // so we have to grab the max of the max for each array that we make from the nested object
-            .domain([0, d3.max(combinedTopTen, function (d) {return d3.max(Object.values(d.count), function (e) { return e }) })  ])
+            .domain([0, d3.max(combinedTopTen, function (d) { return d3.max(Object.values(d.count), function (e) { return e }) })])
             .range([height, 0]);
 
 
@@ -516,8 +531,14 @@ function groupedBar(link) {
             .attr("width", xScaleSub.bandwidth())
             .attr("height", function (d) { return height - yScale(d.value); })
             .attr("fill", function (d) { return colors(d.key); })
-            .on("mouseover", toolTip.show)
-            .on("mouseout", toolTip.hide);
+            .on("mouseover.t", toolTip.show)
+            .on("mouseover.c", function (d) {
+                d3.select(this).style("fill", d3.rgb(colors(d.key)).darker(2))
+            })
+            .on("mouseout.t", toolTip.hide)
+            .on("mouseout.c", function (d) {
+                d3.select(this).style("fill", colors(d.key));
+            });
 
         // then we have out legend to show which color is which
         var legend = chartGroup.selectAll(".legend")
@@ -584,7 +605,7 @@ function groupedBar(link) {
                 .domain(newData.map(d => d.name))
                 .range([0, width])
                 .padding(0.1);
-            
+
             var xScaleSub = d3.scaleBand()
                 .domain(subs)
                 .range([0, xScaleAll.bandwidth()])
@@ -592,10 +613,10 @@ function groupedBar(link) {
 
             var colors = d3.scaleOrdinal()
                 .domain(subs)
-                .range([ "rgba(100, 200, 102, 0.7)","rgba(255, 100, 102, 0.7)"]);
+                .range(["rgba(100, 200, 102, 0.7)", "rgba(255, 100, 102, 0.7)"]);
 
             var yScale = d3.scaleLinear()
-                .domain([0, d3.max(newData, function (d) {return d3.max(Object.values(d.count), function (e) { return e }) })  ])
+                .domain([0, d3.max(newData, function (d) { return d3.max(Object.values(d.count), function (e) { return e }) })])
                 .range([height, 0]);
 
 
@@ -638,13 +659,19 @@ function groupedBar(link) {
                 .attr("width", xScaleSub.bandwidth())
                 .attr("height", function (d) { return height - yScale(d.value); })
                 .attr("fill", function (d) { return colors(d.key); })
-                .on("mouseover", toolTip.show)
-                .on("mouseout", toolTip.hide);
+                .on("mouseover.t", toolTip.show)
+                .on("mouseover.c", function (d) {
+                    d3.select(this).style("fill", d3.rgb(colors(d.key)).darker(2))
+                })
+                .on("mouseout.t", toolTip.hide)
+                .on("mouseout.c", function (d) {
+                    d3.select(this).style("fill", colors(d.key));
+                });
 
-            
-            
+
+            chartGroup.selectAll("rect").on("click", d => buildSalaryChart(url, d.name))
             setTimeout(function () { truncateText() }, 500);
-    
+
         };
 
         // and then all our listeners
@@ -697,8 +724,11 @@ function groupedBar(link) {
 
             groupedUpdate(comFortyFifty);
         });
+
+        chartGroup.selectAll("rect").on("click", d => buildSalaryChart(url, d.name))
     });
 };
 // then we call our grouped bar chart function so it loads on page load
 groupedBar(url);
 
+// chartGroup.selectAll("rect").on("click", d => buildSalaryChart(url, d))
