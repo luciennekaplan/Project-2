@@ -67,7 +67,7 @@ def all():
 
 @app.route("/data-analyst/locations")
 def dataLocations():
-    data = mongo.db.CleanBusinessAnalystLocations.find()
+    data = mongo.db.CleanDataAnalystLocations.find()
     output = {}
     for row in data:
         for key,value in row.items():
