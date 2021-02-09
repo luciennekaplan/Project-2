@@ -88,7 +88,12 @@ cityArrayData.forEach(d => {
             interactive: true
         }).on("click", function (event){
             svg.remove()
-            groupedBar(url, d.name)
+            if (url === "/all") {
+                groupedBar(url, d.name)
+            }
+            else{
+                updateDash(url, d.name)
+            }
         }).bindTooltip(`${d.name} <br> # of jobs: ${d.count}`)
     )
 })
@@ -105,7 +110,12 @@ cityArrayBus.forEach(d => {
             interactive: true
         }).on("click", function (event){
             svg.remove()
-            groupedBar(url, d.name)
+            if (url === "/all") {
+                groupedBar(url, d.name)
+            }
+            else{
+                updateDash(url, d.name)
+            }
         }).bindTooltip(`${d.name} <br> # of jobs: ${d.count}`)
     )
 })

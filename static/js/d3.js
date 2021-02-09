@@ -21,13 +21,22 @@ var chartGroup;
 var url = "/all";
 
 // and here we have our function that builds the bar chart
-function updateDash(link) {
+function updateDash(link, city) {
     // we log the link here so we can see if we're going to the right place
     console.log(link);
     // then we have our promise
     d3.json(link).then(function (data) {
         // and we look at the data to make sure we're getting the right stuff
         console.log(data);
+
+        if (city !== undefined) {
+            var filtered = data.result.filter(function (d) { return d.location.includes(city) })
+
+            data = {
+                result: filtered
+            }
+            buildSalaryChart(url, undefined, data)
+        }
 
         // here we add the svg element to the html
         svg = d3.select("#industrybar")
@@ -88,23 +97,45 @@ function updateDash(link) {
         console.log(sortedDicts);
 
         // here we have a bunch of slices so we're only looking at 10 industries at a time
-        var topTen = sortedDicts.slice(0, 10);
-        var tenToTwenty = sortedDicts.slice(10, 20);
-        var twentyToThirty = sortedDicts.slice(20, 30);
-        var thirtyToForty = sortedDicts.slice(30, 40);
-        var fortyToFifty = sortedDicts.slice(40, 50);
+        if (sortedDicts.length > 10) {
+            var topTen = sortedDicts.slice(0, 10);
+        }
+        if (sortedDicts.length > 20) {
+            var tenToTwenty = sortedDicts.slice(10, 20);
+        }
+        if (sortedDicts.length > 30) {
+            var twentyToThirty = sortedDicts.slice(20, 30);
+        }
+        if (sortedDicts.length > 40) {
+            var thirtyToForty = sortedDicts.slice(30, 40);
+        }
+        if (sortedDicts.length > 50) {
+            var fortyToFifty = sortedDicts.slice(40, 50);
+        }
+        if (sortedDicts.length > 10) {
+            // then here we set up our initial x axis with the top 10 industries
+            var xScale = d3.scaleBand()
+                .domain(topTen.map(d => d.name))
+                .range([0, width])
+                .padding(0.1);
 
-        // then here we set up our initial x axis with the top 10 industries
-        var xScale = d3.scaleBand()
-            .domain(topTen.map(d => d.name))
-            .range([0, width])
-            .padding(0.1);
+            // and our initial y axis with the top 10 industries
+            var yScale = d3.scaleLinear()
+                .domain([0, d3.max(topTen, d => d.count)])
+                .range([height, 0]);
+        }
+        else {
+            // then here we set up our initial x axis with the top 10 industries
+            var xScale = d3.scaleBand()
+                .domain(sortedDicts.map(d => d.name))
+                .range([0, width])
+                .padding(0.1);
 
-        // and our initial y axis with the top 10 industries
-        var yScale = d3.scaleLinear()
-            .domain([0, d3.max(topTen, d => d.count)])
-            .range([height, 0]);
-
+            // and our initial y axis with the top 10 industries
+            var yScale = d3.scaleLinear()
+                .domain([0, d3.max(sortedDicts, d => d.count)])
+                .range([height, 0]);
+        }
         // then we assign them their own variables
         var bottomAxis = d3.axisBottom(xScale);
         var leftAxis = d3.axisLeft(yScale);
@@ -151,61 +182,48 @@ function updateDash(link) {
 
         var type = labelChart("result", url);
 
-        // then we add the bars to the bar chart with the data we need
-        chartGroup.selectAll(".indusbar")
-            .data(topTen)
-            .enter()
-            .append("rect")
-            .classed("indusbar", true)
-            .attr("x", d => xScale(d.name))
-            .attr("y", d => yScale(d.count))
-            .attr("width", xScale.bandwidth())
-            .attr("height", d => height - yScale(d.count))
-            .attr("fill", pickColor(type)["fill"])
-            .on("mouseover.t", toolTip.show)
-            .on("mouseover.c", function (d) {
-                d3.select(this).style("fill", d3.rgb(pickColor(type)["fill"]).darker(2))
-            })
-            .on("mouseout.t", toolTip.hide)
-            .on("mouseout.c", function (d) {
-                d3.select(this).style("fill", pickColor(type)["fill"]);
-            });
-
-        // and here we add the different axes labels for the different pages of data    
-        var topTenAxis = chartGroup.append("text")
-            .attr("transform", `translate(${(width / 2) - 30}, ${height + margin.top})`)
-            .attr("text-anchor", "middle")
-            .attr("font-size", "16px")
-            .classed("active x", true)
-            .text("1");
-
-        var tenToTwentyAxis = chartGroup.append("text")
-            .attr("transform", `translate(${(width / 2) - 20}, ${height + margin.top})`)
-            .attr("text-anchor", "middle")
-            .attr("font-size", "16px")
-            .classed("inactive", true)
-            .text("2");
-
-        var twentyToThirtyAxis = chartGroup.append("text")
-            .attr("transform", `translate(${(width / 2) - 10}, ${height + margin.top})`)
-            .attr("text-anchor", "middle")
-            .attr("font-size", "16px")
-            .classed("inactive", true)
-            .text("3");
-
-        var thirtyToFortyAxis = chartGroup.append("text")
-            .attr("transform", `translate(${(width / 2)}, ${height + margin.top})`)
-            .attr("text-anchor", "middle")
-            .attr("font-size", "16px")
-            .classed("inactive", true)
-            .text("4");
-
-        var fortyToFiftyAxis = chartGroup.append("text")
-            .attr("transform", `translate(${(width / 2) + 10}, ${height + margin.top})`)
-            .attr("text-anchor", "middle")
-            .attr("font-size", "16px")
-            .classed("inactive", true)
-            .text("5");
+        if (sortedDicts.length > 10) {
+            // then we add the bars to the bar chart with the data we need
+            chartGroup.selectAll(".indusbar")
+                .data(topTen)
+                .enter()
+                .append("rect")
+                .classed("indusbar", true)
+                .attr("x", d => xScale(d.name))
+                .attr("y", d => yScale(d.count))
+                .attr("width", xScale.bandwidth())
+                .attr("height", d => height - yScale(d.count))
+                .attr("fill", pickColor(type)["fill"])
+                .on("mouseover.t", toolTip.show)
+                .on("mouseover.c", function (d) {
+                    d3.select(this).style("fill", d3.rgb(pickColor(type)["fill"]).darker(2))
+                })
+                .on("mouseout.t", toolTip.hide)
+                .on("mouseout.c", function (d) {
+                    d3.select(this).style("fill", pickColor(type)["fill"]);
+                });
+        }
+        else {
+            // then we add the bars to the bar chart with the data we need
+            chartGroup.selectAll(".indusbar")
+                .data(sortedDicts)
+                .enter()
+                .append("rect")
+                .classed("indusbar", true)
+                .attr("x", d => xScale(d.name))
+                .attr("y", d => yScale(d.count))
+                .attr("width", xScale.bandwidth())
+                .attr("height", d => height - yScale(d.count))
+                .attr("fill", pickColor(type)["fill"])
+                .on("mouseover.t", toolTip.show)
+                .on("mouseover.c", function (d) {
+                    d3.select(this).style("fill", d3.rgb(pickColor(type)["fill"]).darker(2))
+                })
+                .on("mouseout.t", toolTip.hide)
+                .on("mouseout.c", function (d) {
+                    d3.select(this).style("fill", pickColor(type)["fill"]);
+                });
+        }
 
         // Then we have our function here to update the data when our listeners hear a click
         function listenerUpdate(newData) {
@@ -265,62 +283,102 @@ function updateDash(link) {
             setTimeout(function () { truncateText() }, 500);
         };
 
+        // and here we add the different axes labels for the different pages of data 
+        if (sortedDicts.length > 10) {
+            var topTenAxis = chartGroup.append("text")
+                .attr("transform", `translate(${(width / 2) - 30}, ${height + margin.top})`)
+                .attr("text-anchor", "middle")
+                .attr("font-size", "16px")
+                .classed("active x", true)
+                .text("1");
 
-        // and then we put the function with the new data in the listeners, as well as changing the clicked button's class to active and all other buttons to inactive
-        topTenAxis.on("click", function (d) {
-            d3.select(".active")
-                .classed("active x", false)
-                .classed("inactive", true);
+            // and then we put the function with the new data in the listeners, as well as changing the clicked button's class to active and all other buttons to inactive
+            topTenAxis.on("click", function (d) {
+                d3.select(".active")
+                    .classed("active x", false)
+                    .classed("inactive", true);
 
-            topTenAxis.classed("inactive", false)
-                .classed("active x", true);
+                topTenAxis.classed("inactive", false)
+                    .classed("active x", true);
 
-            listenerUpdate(topTen);
-        });
+                listenerUpdate(topTen);
+            });
+        }
+        if (sortedDicts.length > 20) {
+            var tenToTwentyAxis = chartGroup.append("text")
+                .attr("transform", `translate(${(width / 2) - 20}, ${height + margin.top})`)
+                .attr("text-anchor", "middle")
+                .attr("font-size", "16px")
+                .classed("inactive", true)
+                .text("2");
 
-        tenToTwentyAxis.on("click", function (d) {
-            d3.select(".active")
-                .classed("active x", false)
-                .classed("inactive", true);
-            tenToTwentyAxis.classed("inactive", false)
-                .classed("active x", true);
+            tenToTwentyAxis.on("click", function (d) {
+                d3.select(".active")
+                    .classed("active x", false)
+                    .classed("inactive", true);
+                tenToTwentyAxis.classed("inactive", false)
+                    .classed("active x", true);
 
-            listenerUpdate(tenToTwenty);
-        });
+                listenerUpdate(tenToTwenty);
+            });
+        }
+        if (sortedDicts.length > 30) {
+            var twentyToThirtyAxis = chartGroup.append("text")
+                .attr("transform", `translate(${(width / 2) - 10}, ${height + margin.top})`)
+                .attr("text-anchor", "middle")
+                .attr("font-size", "16px")
+                .classed("inactive", true)
+                .text("3");
 
-        twentyToThirtyAxis.on("click", function (d) {
-            d3.select(".active")
-                .classed("active x", false)
-                .classed("inactive", true);
-            twentyToThirtyAxis.classed("inactive", false)
-                .classed("active x", true);
+            twentyToThirtyAxis.on("click", function (d) {
+                d3.select(".active")
+                    .classed("active x", false)
+                    .classed("inactive", true);
+                twentyToThirtyAxis.classed("inactive", false)
+                    .classed("active x", true);
 
-            listenerUpdate(twentyToThirty);
-        });
+                listenerUpdate(twentyToThirty);
+            });
+        }
 
+        if (sortedDicts.length > 40) {
+            var thirtyToFortyAxis = chartGroup.append("text")
+                .attr("transform", `translate(${(width / 2)}, ${height + margin.top})`)
+                .attr("text-anchor", "middle")
+                .attr("font-size", "16px")
+                .classed("inactive", true)
+                .text("4");
 
-        thirtyToFortyAxis.on("click", function (d) {
-            d3.select(".active")
-                .classed("active x", false)
-                .classed("inactive", true);
-            thirtyToFortyAxis.classed("inactive", false)
-                .classed("active x", true);
+            thirtyToFortyAxis.on("click", function (d) {
+                d3.select(".active")
+                    .classed("active x", false)
+                    .classed("inactive", true);
+                thirtyToFortyAxis.classed("inactive", false)
+                    .classed("active x", true);
 
-            listenerUpdate(thirtyToForty);
-        });
+                listenerUpdate(thirtyToForty);
+            });
+        }
 
+        if (sortedDicts.length > 50) {
+            var fortyToFiftyAxis = chartGroup.append("text")
+                .attr("transform", `translate(${(width / 2) + 10}, ${height + margin.top})`)
+                .attr("text-anchor", "middle")
+                .attr("font-size", "16px")
+                .classed("inactive", true)
+                .text("5");
 
-        fortyToFiftyAxis.on("click", function (d) {
-            d3.select(".active")
-                .classed("active x", false)
-                .classed("inactive", true);
-            fortyToFiftyAxis.classed("inactive", false)
-                .classed("active x", true);
+            fortyToFiftyAxis.on("click", function (d) {
+                d3.select(".active")
+                    .classed("active x", false)
+                    .classed("inactive", true);
+                fortyToFiftyAxis.classed("inactive", false)
+                    .classed("active x", true);
 
-            listenerUpdate(fortyToFifty);
-        });
-
-        chartGroup.selectAll("rect").on("click", d => buildSalaryChart(url, d.name))
+                listenerUpdate(fortyToFifty);
+            });
+        }
+        chartGroup.selectAll("rect").on("click", d => buildSalaryChart(url, d.name, data))
     });
 };
 
@@ -332,8 +390,8 @@ function groupedBar(link, city) {
         // first things first we call the data then log it so we know what we're dealing with
         console.log(data);
         if (city !== undefined) {
-            var filtDa = data.CleanDataAnalyst.filter(function (d) {return d.location.includes(city)})
-            var filtBa = data.CleanBusinessAnalyst.filter(function (d) {return d.location.includes(city)})
+            var filtDa = data.CleanDataAnalyst.filter(function (d) { return d.location.includes(city) })
+            var filtBa = data.CleanBusinessAnalyst.filter(function (d) { return d.location.includes(city) })
             data = {
                 CleanDataAnalyst: filtDa,
                 CleanBusinessAnalyst: filtBa
@@ -444,33 +502,33 @@ function groupedBar(link, city) {
 
         // and we get our slices for later
         if (sortedDictsCombined.length > 10) {
-        var combinedTopTen = sortedDictsCombined.slice(0, 10);
+            var combinedTopTen = sortedDictsCombined.slice(0, 10);
         }
         if (sortedDictsCombined.length > 10) {
-        var comTenTwenty = sortedDictsCombined.slice(10, 20);
+            var comTenTwenty = sortedDictsCombined.slice(10, 20);
         }
         if (sortedDictsCombined.length > 30) {
-        var comTwentyThirty = sortedDictsCombined.slice(20, 30);
+            var comTwentyThirty = sortedDictsCombined.slice(20, 30);
         }
         if (sortedDictsCombined.length > 40) {
-        var comThirtyForty = sortedDictsCombined.slice(30, 40);
+            var comThirtyForty = sortedDictsCombined.slice(30, 40);
         }
         if (sortedDictsCombined.length > 50) {
-        var comFortyFifty = sortedDictsCombined.slice(40, 50);
+            var comFortyFifty = sortedDictsCombined.slice(40, 50);
         }
         // now we set up our chart
         // a grouped bar chart in d3 requires 2 different x scales, one for the overall groups, and one for the subgroups
         if (sortedDictsCombined.length > 10) {
-        var xScaleAll = d3.scaleBand()
-            .domain(combinedTopTen.map(d => d.name))
-            .range([0, width])
-            .padding(0.1);
+            var xScaleAll = d3.scaleBand()
+                .domain(combinedTopTen.map(d => d.name))
+                .range([0, width])
+                .padding(0.1);
         }
         else {
             var xScaleAll = d3.scaleBand()
-            .domain(sortedDictsCombined.map(d => d.name))
-            .range([0, width])
-            .padding(0.1);
+                .domain(sortedDictsCombined.map(d => d.name))
+                .range([0, width])
+                .padding(0.1);
         }
         // here we grab the names of our sub groups
         var subs = Object.keys(sortedDictsCombined[0].count);
@@ -494,7 +552,7 @@ function groupedBar(link, city) {
                 .domain([0, d3.max(combinedTopTen, function (d) { return d3.max(Object.values(d.count), function (e) { return e }) })])
                 .range([height, 0]);
         }
-        else{
+        else {
             var yScale = d3.scaleLinear()
                 // something different here, because we have more than one value we can't just go off one key, because the other value might be larger at some point
                 // so we have to grab the max of the max for each array that we make from the nested object
@@ -548,7 +606,7 @@ function groupedBar(link, city) {
 
 
         // here is where we make our bars appear
-        if(sortedDictsCombined.length > 10) {
+        if (sortedDictsCombined.length > 10) {
             chartGroup.append("g")
                 .selectAll("g")
                 .data(combinedTopTen)
@@ -575,28 +633,28 @@ function groupedBar(link, city) {
         }
         else {
             chartGroup.append("g")
-            .selectAll("g")
-            .data(sortedDictsCombined)
-            .enter()
-            .append("g")
-            .attr("transform", function (d) { return "translate(" + xScaleAll(d.name) + ",0)"; })
-            .selectAll("rect")
-            .data(function (d) { return subs.map(function (key) { return { name: d.name, key: key, value: d["count"][key] }; }); })// here we assign the different job titles data to each bar
-            .enter().append("rect")
-            .classed("indusbar", true)
-            .attr("x", function (d) { return xScaleSub(d.key); })
-            .attr("y", function (d) { return yScale(d.value); })
-            .attr("width", xScaleSub.bandwidth())
-            .attr("height", function (d) { return height - yScale(d.value); })
-            .attr("fill", function (d) { return colors(d.key); })
-            .on("mouseover.t", toolTip.show)
-            .on("mouseover.c", function (d) {
-                d3.select(this).style("fill", d3.rgb(colors(d.key)).darker(2))
-            })
-            .on("mouseout.t", toolTip.hide)
-            .on("mouseout.c", function (d) {
-                d3.select(this).style("fill", colors(d.key));
-            });
+                .selectAll("g")
+                .data(sortedDictsCombined)
+                .enter()
+                .append("g")
+                .attr("transform", function (d) { return "translate(" + xScaleAll(d.name) + ",0)"; })
+                .selectAll("rect")
+                .data(function (d) { return subs.map(function (key) { return { name: d.name, key: key, value: d["count"][key] }; }); })// here we assign the different job titles data to each bar
+                .enter().append("rect")
+                .classed("indusbar", true)
+                .attr("x", function (d) { return xScaleSub(d.key); })
+                .attr("y", function (d) { return yScale(d.value); })
+                .attr("width", xScaleSub.bandwidth())
+                .attr("height", function (d) { return height - yScale(d.value); })
+                .attr("fill", function (d) { return colors(d.key); })
+                .on("mouseover.t", toolTip.show)
+                .on("mouseover.c", function (d) {
+                    d3.select(this).style("fill", d3.rgb(colors(d.key)).darker(2))
+                })
+                .on("mouseout.t", toolTip.hide)
+                .on("mouseout.c", function (d) {
+                    d3.select(this).style("fill", colors(d.key));
+                });
         }
         // then we have out legend to show which color is which
         var legend = chartGroup.selectAll(".legend")
@@ -698,7 +756,7 @@ function groupedBar(link, city) {
 
         // then we have our page numbers and our listeners
 
-        if(sortedDictsCombined.length > 10) {
+        if (sortedDictsCombined.length > 10) {
             var comTenAxis = chartGroup.append("text")
                 .attr("transform", `translate(${(width / 2) - 30}, ${height + margin.top})`)
                 .attr("text-anchor", "middle")
@@ -717,7 +775,7 @@ function groupedBar(link, city) {
             });
         }
 
-        if(sortedDictsCombined.length > 10) {
+        if (sortedDictsCombined.length > 10) {
             var comTenTwentyAxis = chartGroup.append("text")
                 .attr("transform", `translate(${(width / 2) - 20}, ${height + margin.top})`)
                 .attr("text-anchor", "middle")
@@ -735,7 +793,7 @@ function groupedBar(link, city) {
                 groupedUpdate(comTenTwenty);
             });
         }
-        if(sortedDictsCombined.length > 30) {
+        if (sortedDictsCombined.length > 30) {
             var comTwentyThirtyAxis = chartGroup.append("text")
                 .attr("transform", `translate(${(width / 2) - 10}, ${height + margin.top})`)
                 .attr("text-anchor", "middle")
@@ -753,7 +811,7 @@ function groupedBar(link, city) {
                 groupedUpdate(comTwentyThirty);
             });
         }
-        if(sortedDictsCombined.length > 40) {
+        if (sortedDictsCombined.length > 40) {
             var comThirtyFortyAxis = chartGroup.append("text")
                 .attr("transform", `translate(${(width / 2)}, ${height + margin.top})`)
                 .attr("text-anchor", "middle")
@@ -771,14 +829,14 @@ function groupedBar(link, city) {
                 groupedUpdate(comThirtyForty);
             });
         }
-        if(sortedDictsCombined.length > 50) {
+        if (sortedDictsCombined.length > 50) {
             var comFortyFiftyAxis = chartGroup.append("text")
                 .attr("transform", `translate(${(width / 2) + 10}, ${height + margin.top})`)
                 .attr("text-anchor", "middle")
                 .attr("font-size", "16px")
                 .classed("inactive", true)
                 .text("5");
-            
+
             comFortyFiftyAxis.on("click", function (d) {
                 d3.select(".active")
                     .classed("active x", false)
