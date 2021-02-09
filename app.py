@@ -63,5 +63,17 @@ def all():
 
     return jsonify(output)
 
+@app.route("/data-analyst/locations")
+def dataLocations():
+    data = mongo.db.CleanBusinessAnalystLocations.find()
+    output = []
+    for row in data:
+        print(row)
+        for key,value in row.items():
+            if (key != '_id'):
+                output.append({key:value})
+    return jsonify(output)
+
+
 if __name__ == "__main__":
     app.run(debug=True)
