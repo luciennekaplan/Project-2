@@ -1,3 +1,4 @@
+
 var cityArrayData = []
 var cityArrayBus = []
 d3.json("/data-analyst/locations").then(dataLoc => {
