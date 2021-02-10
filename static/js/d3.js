@@ -279,7 +279,13 @@ function updateDash(link, city) {
                     d3.select(this).style("fill", pickColor(type)["fill"]);
                 });
 
-            chartGroup.selectAll("rect").on("click", d => buildSalaryChart(url, d.name))
+            chartGroup.selectAll("rect").on("click", d => {
+                if (city !== undefined) {
+                    buildSalaryChart(url, d.name, data)
+                }
+                else{
+                    buildSalaryChart(url, d.name)
+                }})
             setTimeout(function () { truncateText() }, 500);
         };
 
@@ -378,7 +384,13 @@ function updateDash(link, city) {
                 listenerUpdate(fortyToFifty);
             });
         }
-        chartGroup.selectAll("rect").on("click", d => buildSalaryChart(url, d.name, data))
+        chartGroup.selectAll("rect").on("click", d => {
+            if (city !== undefined) {
+                buildSalaryChart(url, d.name, data)
+            }
+            else{
+                buildSalaryChart(url, d.name)
+            }})
     });
 };
 
@@ -750,7 +762,13 @@ function groupedBar(link, city) {
                 });
 
 
-            chartGroup.selectAll("rect").on("click", d => buildSalaryChart(url, d.name, data))
+            chartGroup.selectAll("rect").on("click", d => {
+                if (city !== undefined) {
+                    buildSalaryChart(url, d.name, data)
+                }
+                else{
+                    buildSalaryChart(url, d.name)
+                }})
             setTimeout(function () { truncateText() }, 500);
 
         };
@@ -848,7 +866,13 @@ function groupedBar(link, city) {
                 groupedUpdate(comFortyFifty);
             });
         }
-        chartGroup.selectAll("rect").on("click", d => buildSalaryChart(url, d.name, data))
+        chartGroup.selectAll("rect").on("click", d => {
+            if (city !== undefined) {
+                buildSalaryChart(url, d.name, data)
+            }
+            else{
+                buildSalaryChart(url, d.name)
+            }})
     });
 };
 // then we call our grouped bar chart function so it loads on page load
