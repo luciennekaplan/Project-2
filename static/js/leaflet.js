@@ -84,8 +84,8 @@ cityArrayData.forEach(d => {
             weight: 2,
             fillOpacity: 0.75,
             color: "black",
-            fillColor: "blue",
-            radius: d.count * 100,
+            fillColor: "rgba(255, 100, 102, 0.7)",
+            radius: d.count * 500,
             interactive: true
         }).on("click", function (event){
             svg.remove()
@@ -106,8 +106,8 @@ cityArrayBus.forEach(d => {
             weight: 2,
             fillOpacity: 0.75,
             color: "black",
-            fillColor: "green",
-            radius: d.count * 100,
+            fillColor: "rgba(100, 200, 102, 0.7)",
+            radius: d.count * 500,
             interactive: true
         }).on("click", function (event){
             svg.remove()

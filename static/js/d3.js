@@ -676,6 +676,7 @@ function groupedBar(link, city) {
             .attr("y", 9)
             .attr("dy", ".35em")
             .style("text-anchor", "end")
+            .attr("fill", "white")
             .text(function (d) { return d; });
 
 
