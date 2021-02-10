@@ -4,17 +4,15 @@ function buildSalaryChart(url, indus, city) {
     d3.json(url).then(function (theData) {
         console.log(theData);
         data = [];
+        var cityTitle = ""
         if(city !== undefined){
             theData = city
             if (url === "/all"){
-            var cityTitle = "in " + city.CleanDataAnalyst[0].location
+            cityTitle = "in " + city.CleanDataAnalyst[0].location
             }
             else {
-                var cityTitle = "in " +city.result[0].location
+                cityTitle = "in " +city.result[0].location
             }
-        }
-        else{
-            var cityTitle = ""
         }
         if (indus !== undefined) {
             console.log(indus)
