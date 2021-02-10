@@ -1,9 +1,21 @@
 
 
-function buildSalaryChart(url, indus) {
+function buildSalaryChart(url, indus, city) {
     d3.json(url).then(function (theData) {
         console.log(theData);
         data = [];
+        if(city !== undefined){
+            theData = city
+            if (url === "/all"){
+            var cityTitle = "in " + city.CleanDataAnalyst[0].location
+            }
+            else {
+                var cityTitle = "in " +city.result[0].location
+            }
+        }
+        else{
+            var cityTitle = ""
+        }
         if (indus !== undefined) {
             console.log(indus)
             
@@ -26,7 +38,7 @@ function buildSalaryChart(url, indus) {
             }
             function shortenTitle(text) {
                 if (text.length > 20)
-                        return text.substring(0, 20) + '...';
+                        return text.substring(0, 15) + '...';
                     else
                         return text;
             }
@@ -57,7 +69,7 @@ function buildSalaryChart(url, indus) {
         var layout = {
             bargap: 0.05,
             bargroupgap: 0.2,
-            title: `${industitle} Common Salaries`,
+            title: `${industitle} Common Salaries ${cityTitle}`,
             xaxis: { title: "Salary" },
             yaxis: { title: "Count" },
             legend: {
