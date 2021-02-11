@@ -633,14 +633,14 @@ function groupedBar(link, city) {
                 .attr("y", function (d) { return yScale(d.value); })
                 .attr("width", xScaleSub.bandwidth())
                 .attr("height", function (d) { return height - yScale(d.value); })
-                .attr("fill", function (d) { return colors(d.key); })
+                .attr("fill", function (d) { return pickColor(d.key)["fill"]; })
                 .on("mouseover.t", toolTip.show)
                 .on("mouseover.c", function (d) {
-                    d3.select(this).style("fill", d3.rgb(colors(d.key)).darker(2))
+                    d3.select(this).style("fill", d3.rgb(pickColor(d.key)["fill"]).darker(2))
                 })
                 .on("mouseout.t", toolTip.hide)
                 .on("mouseout.c", function (d) {
-                    d3.select(this).style("fill", colors(d.key));
+                    d3.select(this).style("fill", pickColor(d.key)["fill"]);
                 });
         }
         else {
@@ -658,14 +658,14 @@ function groupedBar(link, city) {
                 .attr("y", function (d) { return yScale(d.value); })
                 .attr("width", xScaleSub.bandwidth())
                 .attr("height", function (d) { return height - yScale(d.value); })
-                .attr("fill", function (d) { return colors(d.key); })
+                .attr("fill", function (d) { return pickColor(d.key)["fill"]; })
                 .on("mouseover.t", toolTip.show)
                 .on("mouseover.c", function (d) {
-                    d3.select(this).style("fill", d3.rgb(colors(d.key)).darker(2))
+                    d3.select(this).style("fill", d3.rgb(pickColor(d.key)["fill"]).darker(2))
                 })
                 .on("mouseout.t", toolTip.hide)
                 .on("mouseout.c", function (d) {
-                    d3.select(this).style("fill", colors(d.key));
+                    d3.select(this).style("fill", pickColor(d.key)["fill"]);
                 });
         }
         // then we have out legend to show which color is which
@@ -680,7 +680,7 @@ function groupedBar(link, city) {
             .attr("x", width - 18)
             .attr("width", 18)
             .attr("height", 18)
-            .style("fill", function (d) { return colors(d); });
+            .style("fill", function (d) { return pickColor(d)["fill"]; });
 
         // and here we add the text
         legend.append("text")
@@ -751,14 +751,14 @@ function groupedBar(link, city) {
                 .attr("y", function (d) { return yScale(d.value); })
                 .attr("width", xScaleSub.bandwidth())
                 .attr("height", function (d) { return height - yScale(d.value); })
-                .attr("fill", function (d) { return colors(d.key); })
+                .attr("fill", function (d) { return pickColor(d.key)["fill"]; })
                 .on("mouseover.t", toolTip.show)
                 .on("mouseover.c", function (d) {
-                    d3.select(this).style("fill", d3.rgb(colors(d.key)).darker(2))
+                    d3.select(this).style("fill", d3.rgb(pickColor(d.key)["fill"]).darker(2))
                 })
                 .on("mouseout.t", toolTip.hide)
                 .on("mouseout.c", function (d) {
-                    d3.select(this).style("fill", colors(d.key));
+                    d3.select(this).style("fill", pickColor(d.key)["fill"]);
                 });
 
 
