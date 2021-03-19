@@ -1,4 +1,4 @@
-# Project-2
+# Jobs in Data
 Blake Ashford, Lucy Kaplan, Savannah Cordry
 
 Since we will soon complete the University of Oregon Data & Analytics Bootcamp, we would like to investigate options for employment across the country. 
@@ -20,3 +20,20 @@ We will take data provided by Kaggle in CSV format, clean it, and then import it
 We have provided clean CSV files in the data folder, so there's no need to clean the data, just to import it. Create a file named `config.py` in the [data folder](https://github.com/luciennekaplan/Project-2/tree/main/data) and store your API key as a string in a variable called `API_KEY`. Then run [mongoImport.py](https://github.com/luciennekaplan/Project-2/blob/main/data/mongoImport.py). **Note:** this will take a couple minutes while it gathers the coordinates from Google.
 ### Step 2: Start up the webpage
 Head to the `app.py` file in the main folder and run it - this should start up a local server for you to view the webpage at. Navigate to the webaddress it gives you and voila! There you have it.
+
+### Website Functionality
+When the website loads it will look like this: 
+
+![loaded in webpage](readmeimgs/Loadedin.png)
+
+You can click on the bars in the industry chart to update the salary chart to just have the salaries for that industry:
+
+![industry salary chart](readmeimgs/industrysalary.png)
+
+You can also click on a specific city to get the industries and salaries for that city:
+
+![city clicked](readmeimgs/cityclicked.png)
+
+From there you can click on the industry bar that you want again to see the salaries for industy in that particular city:
+
+![city industry](readmeimgs/cityindustryclicked.png)
